@@ -1,4 +1,9 @@
-"""M0-D 桌面版验收（在 Windows 开发机上对安装后的程序执行）。"""
+"""M0-D 桌面版验收（在 Windows 开发机上对安装后的程序执行）。
+
+用法：先运行 scripts/build-desktop.ps1 生成安装包，然后在 backend/ 目录执行
+    uv run python ../scripts/m0d_acceptance.py
+会静默安装、启动并关闭应用（桌面上会短暂出现窗口）。
+"""
 import csv, glob, io, json, os, re, shutil, subprocess, sys, tempfile, time
 import httpx
 
@@ -79,8 +84,13 @@ mark("③", st1 == "succeeded" and final and final["status"] == "succeeded" and 
      f"空任务 {st1}；执行中强制结束后重启 → {final and final['status']}（第 {final and final['result'].get('attempt')} 次执行，中断记录：{final and (final.get('last_error') or {}).get('class')}）")
 
 # ---------- ⑥ 连通检查 & ⑤ 明文扫描 ----------
-key = next(l.split("=", 1)[1].strip() for l in open(os.path.join(ROOT, ".env"), encoding="utf-8") if l.startswith("FASTMOSS_MCP_API_KEY="))
-r = cli.put(f"{B}/settings/fastmoss", headers=H, json={"api_key": key})
+# Key 来源：Windows 凭据管理器中已保存的（设置页填过），否则取环境变量 FASTMOSS_API_KEY
+from tk_workspace.platform import secrets as _secrets
+
+key = _secrets.get_secret(_secrets.FASTMOSS_API_KEY) or os.environ.get("FASTMOSS_API_KEY", "")
+if not key:
+    sys.exit("请先在应用“设置”页保存 FastMoss Key，或设置环境变量 FASTMOSS_API_KEY")
+cli.put(f"{B}/settings/fastmoss", headers=H, json={"api_key": key})
 chk = cli.post(f"{B}/settings/checks", headers=H).json()
 fm, llm = chk["fastmoss"], chk["llm"]
 fm_ok = fm["status"] == "ok" and (fm.get("credit_cost") or 0) == 0
