@@ -15,7 +15,7 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 APP_NAME = "TKWorkspace"
-APP_VERSION = "0.2.0"
+APP_VERSION = "0.3.0"
 KEYRING_SERVICE = "TKWorkspace"
 
 

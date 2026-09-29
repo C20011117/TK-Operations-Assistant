@@ -2,7 +2,7 @@
 
 用法（仓库根目录）：cd backend && uv run python ../scripts/m3_acceptance.py
 - 使用全新的临时数据目录，候选用人工导入（不调用 FastMoss、不花额度）。
-- 后端从源码启动；个人数据密钥与正式应用共用同一个凭据管理器条目（本机本用户）。
+- 后端默认从源码启动；设置 M3_BACKEND_EXE=<tk-backend.exe 路径> 可验收打包后的后端；个人数据密钥与正式应用共用同一个凭据管理器条目（本机本用户）。
 """
 
 import json
@@ -39,7 +39,9 @@ tmp = tempfile.mkdtemp(prefix="tkws-m3-")
 data = os.path.join(tmp, "TKWorkspace")
 env = dict(os.environ, TKWS_DATA_DIR=data, TKWS_LAUNCH_TOKEN=TOKEN, PYTHONIOENCODING="utf-8")
 proc = subprocess.Popen(
-    [sys.executable, "-c", "from tk_workspace.desktop import main; raise SystemExit(main())"],
+    [os.environ["M3_BACKEND_EXE"]]
+    if os.environ.get("M3_BACKEND_EXE")
+    else [sys.executable, "-c", "from tk_workspace.desktop import main; raise SystemExit(main())"],
     env=env,
     stdout=subprocess.PIPE,
     stderr=subprocess.DEVNULL,
