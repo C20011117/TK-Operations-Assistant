@@ -1,4 +1,4 @@
-# 构建 Windows 安装包：后端（PyInstaller 目录模式）→ 前端 → Tauri NSIS 安装包。
+﻿# 构建 Windows 安装包：后端（PyInstaller 目录模式）→ 前端 → Tauri NSIS 安装包。
 # 用法（仓库根目录，PowerShell）：  .\scripts\build-desktop.ps1
 # 产物：apps\desktop\src-tauri\target\release\bundle\nsis\TK达人工作台_<版本>_x64-setup.exe
 $ErrorActionPreference = "Stop"

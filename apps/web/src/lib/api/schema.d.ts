@@ -192,6 +192,302 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 产品列表 */
+        get: operations["products_index_api_v1_products_get"];
+        put?: never;
+        /** 新建产品（同时生成空白草稿 v1） */
+        post: operations["products_create_api_v1_products_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/products/{product_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 产品详情（当前版本、草稿、版本历史） */
+        get: operations["products_detail_api_v1_products__product_id__get"];
+        /** 修改名称与 SKU */
+        put: operations["products_update_api_v1_products__product_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/products/{product_id}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 保存草稿 */
+        put: operations["products_save_draft_api_v1_products__product_id__draft_put"];
+        /** 以当前版本为底稿开始修改 */
+        post: operations["products_start_draft_api_v1_products__product_id__draft_post"];
+        /** 放弃草稿 */
+        delete: operations["products_discard_draft_api_v1_products__product_id__draft_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/products/{product_id}/draft/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 确认草稿为新版本 */
+        post: operations["products_confirm_draft_api_v1_products__product_id__draft_confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/products/{product_id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 归档 */
+        post: operations["products_archive_api_v1_products__product_id__archive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/products/{product_id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 取消归档 */
+        post: operations["products_restore_api_v1_products__product_id__restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/products/versions/{version_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 查看某个历史版本 */
+        get: operations["products_version_api_v1_products_versions__version_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/criteria/fields": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 可用的找人条件字段（含 FastMoss 能力说明） */
+        get: operations["criteria_fields_api_v1_criteria_fields_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaigns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 任务列表 */
+        get: operations["campaigns_index_api_v1_campaigns_get"];
+        put?: never;
+        /** 新建找人任务（单站点） */
+        post: operations["campaigns_create_api_v1_campaigns_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaigns/{campaign_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 任务详情（含就绪检查） */
+        get: operations["campaigns_detail_api_v1_campaigns__campaign_id__get"];
+        /** 修改任务基本信息 */
+        put: operations["campaigns_update_api_v1_campaigns__campaign_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaigns/{campaign_id}/duplicate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 复制到其他站点 */
+        post: operations["campaigns_duplicate_api_v1_campaigns__campaign_id__duplicate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaigns/{campaign_id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 归档 */
+        post: operations["campaigns_archive_api_v1_campaigns__campaign_id__archive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaigns/{campaign_id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 取消归档 */
+        post: operations["campaigns_restore_api_v1_campaigns__campaign_id__restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign-markets/{cm_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 修改名单数量、预算、额度上限 */
+        put: operations["cm_update_api_v1_campaign_markets__cm_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign-markets/{cm_id}/criteria": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 保存条件草稿 */
+        put: operations["cm_save_criteria_api_v1_campaign_markets__cm_id__criteria_put"];
+        post?: never;
+        /** 放弃条件草稿 */
+        delete: operations["cm_discard_criteria_api_v1_campaign_markets__cm_id__criteria_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign-markets/{cm_id}/use-latest-product": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 更新到产品最新版本 */
+        post: operations["cm_use_latest_api_v1_campaign_markets__cm_id__use_latest_product_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign-markets/{cm_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 确认任务（有缺项时返回 422） */
+        post: operations["cm_confirm_api_v1_campaign_markets__cm_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -202,6 +498,191 @@ export interface components {
             version: string;
             /** Data Dir */
             data_dir: string;
+        };
+        /** CampaignCreate */
+        CampaignCreate: {
+            /** Name */
+            name: string;
+            /**
+             * Goal
+             * @enum {string}
+             */
+            goal: "sales" | "content" | "awareness";
+            /**
+             * Collaboration Type
+             * @enum {string}
+             */
+            collaboration_type: "free_sample" | "paid" | "commission" | "hybrid";
+            /** Start Date */
+            start_date?: string | null;
+            /** End Date */
+            end_date?: string | null;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /** Product Id */
+            product_id: string;
+            /** Market Code */
+            market_code: string;
+            market?: components["schemas"]["MarketSettingsIn"];
+        };
+        /** CampaignDetail */
+        CampaignDetail: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Goal
+             * @enum {string}
+             */
+            goal: "sales" | "content" | "awareness";
+            /**
+             * Collaboration Type
+             * @enum {string}
+             */
+            collaboration_type: "free_sample" | "paid" | "commission" | "hybrid";
+            /** Start Date */
+            start_date: string | null;
+            /** End Date */
+            end_date: string | null;
+            /** Notes */
+            notes: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "archived";
+            product: components["schemas"]["ProductRef"];
+            /** Markets */
+            markets: components["schemas"]["CampaignMarketView"][];
+            /** Created At */
+            created_at: string;
+            /** Updated At */
+            updated_at: string;
+        };
+        /** CampaignDuplicate */
+        CampaignDuplicate: {
+            /** Market Code */
+            market_code: string;
+            /** Name */
+            name?: string | null;
+        };
+        /** CampaignMarketView */
+        CampaignMarketView: {
+            /** Id */
+            id: string;
+            /** Market Code */
+            market_code: string;
+            /** Market Name Zh */
+            market_name_zh: string;
+            /** Market Data Status */
+            market_data_status: string;
+            /** Fastmoss Region */
+            fastmoss_region: string | null;
+            /** Content Languages */
+            content_languages: string[];
+            /** Time Zone */
+            time_zone: string;
+            /** Reporting Currency */
+            reporting_currency: string;
+            /** Target List Size */
+            target_list_size: number | null;
+            /** Budget Min */
+            budget_min: string | null;
+            /** Budget Max */
+            budget_max: string | null;
+            /** Cost Cap Credits */
+            cost_cap_credits: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "ready";
+            /** Confirmed At */
+            confirmed_at: string | null;
+            /** Product Version Id */
+            product_version_id: string;
+            /** Product Version No */
+            product_version_no: number;
+            /**
+             * Latest Product Version No
+             * @description 产品当前确认版本号；比任务引用的新时提示更新
+             */
+            latest_product_version_no: number | null;
+            /** @description 任务引用的产品版本中该站点的价格条款 */
+            price_term: components["schemas"]["MarketTerm"] | null;
+            criteria_draft: components["schemas"]["CriteriaVersion"] | null;
+            criteria_current: components["schemas"]["CriteriaVersion"] | null;
+            /** Criteria History */
+            criteria_history: components["schemas"]["CriteriaVersionSummary"][];
+            readiness: components["schemas"]["Readiness"];
+        };
+        /** CampaignSummary */
+        CampaignSummary: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Product Name */
+            product_name: string;
+            /** Product Sku */
+            product_sku: string;
+            /** Market Code */
+            market_code: string;
+            /** Market Name Zh */
+            market_name_zh: string;
+            /** Reporting Currency */
+            reporting_currency: string;
+            /** Time Zone */
+            time_zone: string;
+            /**
+             * Goal
+             * @enum {string}
+             */
+            goal: "sales" | "content" | "awareness";
+            /**
+             * Market Status
+             * @enum {string}
+             */
+            market_status: "draft" | "ready";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "archived";
+            /** Start Date */
+            start_date: string | null;
+            /** End Date */
+            end_date: string | null;
+            /** Updated At */
+            updated_at: string;
+        };
+        /** CampaignUpdate */
+        CampaignUpdate: {
+            /** Name */
+            name: string;
+            /**
+             * Goal
+             * @enum {string}
+             */
+            goal: "sales" | "content" | "awareness";
+            /**
+             * Collaboration Type
+             * @enum {string}
+             */
+            collaboration_type: "free_sample" | "paid" | "commission" | "hybrid";
+            /** Start Date */
+            start_date?: string | null;
+            /** End Date */
+            end_date?: string | null;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
         };
         /** CreateJobRequest */
         CreateJobRequest: {
@@ -215,6 +696,94 @@ export interface components {
             params?: {
                 [key: string]: unknown;
             };
+        };
+        /** CriteriaIn */
+        CriteriaIn: {
+            /** Criteria */
+            criteria?: components["schemas"]["Criterion"][];
+            search?: components["schemas"]["SearchInput"];
+        };
+        /** CriteriaVersion */
+        CriteriaVersion: {
+            /** Id */
+            id: string;
+            /** Version No */
+            version_no: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "confirmed" | "superseded";
+            /** Product Version Id */
+            product_version_id: string;
+            /** Product Version No */
+            product_version_no: number;
+            /** Criteria */
+            criteria: components["schemas"]["Criterion"][];
+            search: components["schemas"]["SearchInput"];
+            /** Created At */
+            created_at: string;
+            /** Confirmed At */
+            confirmed_at: string | null;
+        };
+        /** CriteriaVersionSummary */
+        CriteriaVersionSummary: {
+            /** Id */
+            id: string;
+            /** Version No */
+            version_no: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "confirmed" | "superseded";
+            /** Product Version No */
+            product_version_no: number;
+            /** Confirmed At */
+            confirmed_at: string | null;
+        };
+        /** Criterion */
+        Criterion: {
+            /** Criterion Id */
+            criterion_id?: string;
+            /** Field Key */
+            field_key: string;
+            /**
+             * Operator
+             * @enum {string}
+             */
+            operator: "between" | "gte" | "lte" | "eq" | "in";
+            /** Expected */
+            expected: unknown;
+            /**
+             * Hardness
+             * @enum {string}
+             */
+            hardness: "hard" | "soft";
+            /**
+             * Unknown Policy
+             * @description 数据未知时：keep 保留为“待核实”，exclude 排除（仅硬条件可选）
+             * @default keep
+             * @enum {string}
+             */
+            unknown_policy: "keep" | "exclude";
+            /**
+             * Provenance
+             * @default user
+             * @enum {string}
+             */
+            provenance: "user" | "model_suggested";
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+        };
+        /** DraftIn */
+        DraftIn: {
+            facts: components["schemas"]["ProductFacts"];
+            /** Market Terms */
+            market_terms?: components["schemas"]["MarketTermIn"][];
         };
         /** ExternalCheck */
         ExternalCheck: {
@@ -254,6 +823,42 @@ export interface components {
             /** Configured */
             configured: boolean;
         };
+        /** FieldOption */
+        FieldOption: {
+            /** Value */
+            value: string;
+            /** Label */
+            label: string;
+        };
+        /** FieldSpec */
+        FieldSpec: {
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /** Description */
+            description: string;
+            /**
+             * Value Type
+             * @enum {string}
+             */
+            value_type: "int_range" | "int" | "money" | "percent" | "enum" | "enum_multi" | "bool";
+            /** Operators */
+            operators: ("between" | "gte" | "lte" | "eq" | "in")[];
+            /**
+             * Support
+             * @enum {string}
+             */
+            support: "search_filter" | "result_field" | "not_provided";
+            /** Support Label */
+            support_label: string;
+            /** Unit */
+            unit?: string | null;
+            /** Options */
+            options?: components["schemas"]["FieldOption"][];
+            /** Data Quality Note */
+            data_quality_note?: string | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -272,6 +877,13 @@ export interface components {
             checks: {
                 [key: string]: string;
             };
+        };
+        /** Issue */
+        Issue: {
+            /** Code */
+            code: string;
+            /** Message */
+            message: string;
         };
         /** JobView */
         JobView: {
@@ -397,6 +1009,253 @@ export interface components {
             /** Notes */
             notes: string;
         };
+        /** MarketSettingsIn */
+        MarketSettingsIn: {
+            /**
+             * Target List Size
+             * @description 目标名单数量
+             */
+            target_list_size?: number | null;
+            /**
+             * Budget Min
+             * @description 预算下限（站点结算币种）
+             */
+            budget_min?: string | null;
+            /**
+             * Budget Max
+             * @description 预算上限（站点结算币种）
+             */
+            budget_max?: string | null;
+            /**
+             * Cost Cap Credits
+             * @description 本任务 FastMoss 额度上限
+             */
+            cost_cap_credits?: number | null;
+        };
+        /** MarketTerm */
+        MarketTerm: {
+            /** Market Code */
+            market_code: string;
+            /**
+             * Price Status
+             * @enum {string}
+             */
+            price_status: "known" | "unknown";
+            /** Price Amount */
+            price_amount?: string | null;
+            /**
+             * Sample Policy
+             * @default unknown
+             * @enum {string}
+             */
+            sample_policy: "free" | "paid" | "none" | "unknown";
+            /** Commission Min Pct */
+            commission_min_pct?: string | null;
+            /** Commission Max Pct */
+            commission_max_pct?: string | null;
+            /** Quote Valid Until */
+            quote_valid_until?: string | null;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /**
+             * Price Currency
+             * @description 站点结算币种，由站点目录决定，不能手填
+             */
+            price_currency: string;
+        };
+        /** MarketTermIn */
+        MarketTermIn: {
+            /** Market Code */
+            market_code: string;
+            /**
+             * Price Status
+             * @enum {string}
+             */
+            price_status: "known" | "unknown";
+            /** Price Amount */
+            price_amount?: string | null;
+            /**
+             * Sample Policy
+             * @default unknown
+             * @enum {string}
+             */
+            sample_policy: "free" | "paid" | "none" | "unknown";
+            /** Commission Min Pct */
+            commission_min_pct?: string | null;
+            /** Commission Max Pct */
+            commission_max_pct?: string | null;
+            /** Quote Valid Until */
+            quote_valid_until?: string | null;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+        };
+        /** ProductCreate */
+        ProductCreate: {
+            /** Sku */
+            sku: string;
+            /** Name */
+            name: string;
+        };
+        /** ProductDetail */
+        ProductDetail: {
+            /** Id */
+            id: string;
+            /** Sku */
+            sku: string;
+            /** Name */
+            name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "archived";
+            /** Current Version No */
+            current_version_no: number | null;
+            /** Has Draft */
+            has_draft: boolean;
+            /**
+             * Market Codes
+             * @description 当前确认版本中有价格条款的站点
+             */
+            market_codes: string[];
+            /** Updated At */
+            updated_at: string;
+            current: components["schemas"]["ProductVersion"] | null;
+            draft: components["schemas"]["ProductVersion"] | null;
+            /** Versions */
+            versions: components["schemas"]["VersionSummary"][];
+        };
+        /**
+         * ProductFacts
+         * @description 规范事实。影响筛选与拍摄包的内容都在这里，确认后不可修改。
+         */
+        ProductFacts: {
+            /**
+             * Summary
+             * @description 一句话介绍产品是什么、解决什么问题
+             * @default
+             */
+            summary: string;
+            /**
+             * Selling Points
+             * @description 主要卖点
+             */
+            selling_points?: string[];
+            /**
+             * Use Scenarios
+             * @description 使用场景
+             */
+            use_scenarios?: string[];
+            /**
+             * Target Customers
+             * @description 目标客户
+             * @default
+             */
+            target_customers: string;
+            /**
+             * Forbidden Claims
+             * @description 禁用表述（不得宣称的功效等）
+             */
+            forbidden_claims?: string[];
+            /**
+             * Reference Links
+             * @description 参考链接（商品页、参考视频）
+             */
+            reference_links?: string[];
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+        };
+        /** ProductRef */
+        ProductRef: {
+            /** Id */
+            id: string;
+            /** Sku */
+            sku: string;
+            /** Name */
+            name: string;
+        };
+        /** ProductSummary */
+        ProductSummary: {
+            /** Id */
+            id: string;
+            /** Sku */
+            sku: string;
+            /** Name */
+            name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "archived";
+            /** Current Version No */
+            current_version_no: number | null;
+            /** Has Draft */
+            has_draft: boolean;
+            /**
+             * Market Codes
+             * @description 当前确认版本中有价格条款的站点
+             */
+            market_codes: string[];
+            /** Updated At */
+            updated_at: string;
+        };
+        /** ProductUpdate */
+        ProductUpdate: {
+            /** Sku */
+            sku: string;
+            /** Name */
+            name: string;
+        };
+        /** ProductVersion */
+        ProductVersion: {
+            /** Id */
+            id: string;
+            /** Version No */
+            version_no: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "confirmed" | "superseded";
+            facts: components["schemas"]["ProductFacts"];
+            /** Market Terms */
+            market_terms: components["schemas"]["MarketTerm"][];
+            /** Content Hash */
+            content_hash: string;
+            /** Created At */
+            created_at: string;
+            /** Confirmed At */
+            confirmed_at: string | null;
+        };
+        /** Readiness */
+        Readiness: {
+            /**
+             * Ready
+             * @description 没有阻断项，可以确认
+             */
+            ready: boolean;
+            /** Blockers */
+            blockers: components["schemas"]["Issue"][];
+            /** Warnings */
+            warnings: components["schemas"]["Issue"][];
+        };
+        /** SearchInput */
+        SearchInput: {
+            /**
+             * Keywords
+             * @description 搜索关键词（产品、品类、内容主题）
+             */
+            keywords?: string[];
+        };
         /** SettingsView */
         SettingsView: {
             llm: components["schemas"]["LLMSettingsView"];
@@ -414,6 +1273,22 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** VersionSummary */
+        VersionSummary: {
+            /** Id */
+            id: string;
+            /** Version No */
+            version_no: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "confirmed" | "superseded";
+            /** Created At */
+            created_at: string;
+            /** Confirmed At */
+            confirmed_at: string | null;
         };
     };
     responses: never;
@@ -745,6 +1620,768 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExternalChecks"];
+                };
+            };
+        };
+    };
+    products_index_api_v1_products_get: {
+        parameters: {
+            query?: {
+                include_archived?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    products_create_api_v1_products_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    products_detail_api_v1_products__product_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    products_update_api_v1_products__product_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    products_save_draft_api_v1_products__product_id__draft_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    products_start_draft_api_v1_products__product_id__draft_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    products_discard_draft_api_v1_products__product_id__draft_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    products_confirm_draft_api_v1_products__product_id__draft_confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    products_archive_api_v1_products__product_id__archive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    products_restore_api_v1_products__product_id__restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    products_version_api_v1_products_versions__version_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductVersion"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    criteria_fields_api_v1_criteria_fields_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldSpec"][];
+                };
+            };
+        };
+    };
+    campaigns_index_api_v1_campaigns_get: {
+        parameters: {
+            query?: {
+                product_id?: string | null;
+                include_archived?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    campaigns_create_api_v1_campaigns_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampaignCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    campaigns_detail_api_v1_campaigns__campaign_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    campaigns_update_api_v1_campaigns__campaign_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampaignUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    campaigns_duplicate_api_v1_campaigns__campaign_id__duplicate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampaignDuplicate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    campaigns_archive_api_v1_campaigns__campaign_id__archive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    campaigns_restore_api_v1_campaigns__campaign_id__restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cm_update_api_v1_campaign_markets__cm_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarketSettingsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cm_save_criteria_api_v1_campaign_markets__cm_id__criteria_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CriteriaIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cm_discard_criteria_api_v1_campaign_markets__cm_id__criteria_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cm_use_latest_api_v1_campaign_markets__cm_id__use_latest_product_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cm_confirm_api_v1_campaign_markets__cm_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

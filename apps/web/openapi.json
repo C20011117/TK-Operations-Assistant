@@ -427,6 +427,1067 @@
           }
         }
       }
+    },
+    "/api/v1/products": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "summary": "产品列表",
+        "operationId": "products_index_api_v1_products_get",
+        "parameters": [
+          {
+            "name": "include_archived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Archived"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductSummary"
+                  },
+                  "title": "Response Products Index Api V1 Products Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "products"
+        ],
+        "summary": "新建产品（同时生成空白草稿 v1）",
+        "operationId": "products_create_api_v1_products_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/{product_id}": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "summary": "产品详情（当前版本、草稿、版本历史）",
+        "operationId": "products_detail_api_v1_products__product_id__get",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "products"
+        ],
+        "summary": "修改名称与 SKU",
+        "operationId": "products_update_api_v1_products__product_id__put",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/{product_id}/draft": {
+      "post": {
+        "tags": [
+          "products"
+        ],
+        "summary": "以当前版本为底稿开始修改",
+        "operationId": "products_start_draft_api_v1_products__product_id__draft_post",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "products"
+        ],
+        "summary": "保存草稿",
+        "operationId": "products_save_draft_api_v1_products__product_id__draft_put",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "products"
+        ],
+        "summary": "放弃草稿",
+        "operationId": "products_discard_draft_api_v1_products__product_id__draft_delete",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/{product_id}/draft/confirm": {
+      "post": {
+        "tags": [
+          "products"
+        ],
+        "summary": "确认草稿为新版本",
+        "operationId": "products_confirm_draft_api_v1_products__product_id__draft_confirm_post",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/{product_id}/archive": {
+      "post": {
+        "tags": [
+          "products"
+        ],
+        "summary": "归档",
+        "operationId": "products_archive_api_v1_products__product_id__archive_post",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/{product_id}/restore": {
+      "post": {
+        "tags": [
+          "products"
+        ],
+        "summary": "取消归档",
+        "operationId": "products_restore_api_v1_products__product_id__restore_post",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/versions/{version_id}": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "summary": "查看某个历史版本",
+        "operationId": "products_version_api_v1_products_versions__version_id__get",
+        "parameters": [
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Version Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductVersion"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/criteria/fields": {
+      "get": {
+        "tags": [
+          "campaigns"
+        ],
+        "summary": "可用的找人条件字段（含 FastMoss 能力说明）",
+        "operationId": "criteria_fields_api_v1_criteria_fields_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FieldSpec"
+                  },
+                  "type": "array",
+                  "title": "Response Criteria Fields Api V1 Criteria Fields Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaigns": {
+      "get": {
+        "tags": [
+          "campaigns"
+        ],
+        "summary": "任务列表",
+        "operationId": "campaigns_index_api_v1_campaigns_get",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Id"
+            }
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Archived"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CampaignSummary"
+                  },
+                  "title": "Response Campaigns Index Api V1 Campaigns Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "campaigns"
+        ],
+        "summary": "新建找人任务（单站点）",
+        "operationId": "campaigns_create_api_v1_campaigns_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaigns/{campaign_id}": {
+      "get": {
+        "tags": [
+          "campaigns"
+        ],
+        "summary": "任务详情（含就绪检查）",
+        "operationId": "campaigns_detail_api_v1_campaigns__campaign_id__get",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Campaign Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "campaigns"
+        ],
+        "summary": "修改任务基本信息",
+        "operationId": "campaigns_update_api_v1_campaigns__campaign_id__put",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Campaign Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaigns/{campaign_id}/duplicate": {
+      "post": {
+        "tags": [
+          "campaigns"
+        ],
+        "summary": "复制到其他站点",
+        "operationId": "campaigns_duplicate_api_v1_campaigns__campaign_id__duplicate_post",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Campaign Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignDuplicate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaigns/{campaign_id}/archive": {
+      "post": {
+        "tags": [
+          "campaigns"
+        ],
+        "summary": "归档",
+        "operationId": "campaigns_archive_api_v1_campaigns__campaign_id__archive_post",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Campaign Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaigns/{campaign_id}/restore": {
+      "post": {
+        "tags": [
+          "campaigns"
+        ],
+        "summary": "取消归档",
+        "operationId": "campaigns_restore_api_v1_campaigns__campaign_id__restore_post",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Campaign Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaign-markets/{cm_id}": {
+      "put": {
+        "tags": [
+          "campaigns"
+        ],
+        "summary": "修改名单数量、预算、额度上限",
+        "operationId": "cm_update_api_v1_campaign_markets__cm_id__put",
+        "parameters": [
+          {
+            "name": "cm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarketSettingsIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaign-markets/{cm_id}/criteria": {
+      "put": {
+        "tags": [
+          "campaigns"
+        ],
+        "summary": "保存条件草稿",
+        "operationId": "cm_save_criteria_api_v1_campaign_markets__cm_id__criteria_put",
+        "parameters": [
+          {
+            "name": "cm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriteriaIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "campaigns"
+        ],
+        "summary": "放弃条件草稿",
+        "operationId": "cm_discard_criteria_api_v1_campaign_markets__cm_id__criteria_delete",
+        "parameters": [
+          {
+            "name": "cm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaign-markets/{cm_id}/use-latest-product": {
+      "post": {
+        "tags": [
+          "campaigns"
+        ],
+        "summary": "更新到产品最新版本",
+        "operationId": "cm_use_latest_api_v1_campaign_markets__cm_id__use_latest_product_post",
+        "parameters": [
+          {
+            "name": "cm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaign-markets/{cm_id}/confirm": {
+      "post": {
+        "tags": [
+          "campaigns"
+        ],
+        "summary": "确认任务（有缺项时返回 422）",
+        "operationId": "cm_confirm_api_v1_campaign_markets__cm_id__confirm_post",
+        "parameters": [
+          {
+            "name": "cm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -449,6 +1510,583 @@
         ],
         "title": "AppInfo"
       },
+      "CampaignCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "goal": {
+            "type": "string",
+            "enum": [
+              "sales",
+              "content",
+              "awareness"
+            ],
+            "title": "Goal"
+          },
+          "collaboration_type": {
+            "type": "string",
+            "enum": [
+              "free_sample",
+              "paid",
+              "commission",
+              "hybrid"
+            ],
+            "title": "Collaboration Type"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Notes",
+            "default": ""
+          },
+          "product_id": {
+            "type": "string",
+            "title": "Product Id"
+          },
+          "market_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "title": "Market Code"
+          },
+          "market": {
+            "$ref": "#/components/schemas/MarketSettingsIn"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "goal",
+          "collaboration_type",
+          "product_id",
+          "market_code"
+        ],
+        "title": "CampaignCreate"
+      },
+      "CampaignDetail": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "goal": {
+            "type": "string",
+            "enum": [
+              "sales",
+              "content",
+              "awareness"
+            ],
+            "title": "Goal"
+          },
+          "collaboration_type": {
+            "type": "string",
+            "enum": [
+              "free_sample",
+              "paid",
+              "commission",
+              "hybrid"
+            ],
+            "title": "Collaboration Type"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "title": "Status"
+          },
+          "product": {
+            "$ref": "#/components/schemas/ProductRef"
+          },
+          "markets": {
+            "items": {
+              "$ref": "#/components/schemas/CampaignMarketView"
+            },
+            "type": "array",
+            "title": "Markets"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "goal",
+          "collaboration_type",
+          "start_date",
+          "end_date",
+          "notes",
+          "status",
+          "product",
+          "markets",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CampaignDetail"
+      },
+      "CampaignDuplicate": {
+        "properties": {
+          "market_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "title": "Market Code"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "market_code"
+        ],
+        "title": "CampaignDuplicate"
+      },
+      "CampaignMarketView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "market_code": {
+            "type": "string",
+            "title": "Market Code"
+          },
+          "market_name_zh": {
+            "type": "string",
+            "title": "Market Name Zh"
+          },
+          "market_data_status": {
+            "type": "string",
+            "title": "Market Data Status"
+          },
+          "fastmoss_region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fastmoss Region"
+          },
+          "content_languages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Content Languages"
+          },
+          "time_zone": {
+            "type": "string",
+            "title": "Time Zone"
+          },
+          "reporting_currency": {
+            "type": "string",
+            "title": "Reporting Currency"
+          },
+          "target_list_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target List Size"
+          },
+          "budget_min": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Min"
+          },
+          "budget_max": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Max"
+          },
+          "cost_cap_credits": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Cap Credits"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "ready"
+            ],
+            "title": "Status"
+          },
+          "confirmed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmed At"
+          },
+          "product_version_id": {
+            "type": "string",
+            "title": "Product Version Id"
+          },
+          "product_version_no": {
+            "type": "integer",
+            "title": "Product Version No"
+          },
+          "latest_product_version_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Product Version No",
+            "description": "产品当前确认版本号；比任务引用的新时提示更新"
+          },
+          "price_term": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MarketTerm"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "任务引用的产品版本中该站点的价格条款"
+          },
+          "criteria_draft": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CriteriaVersion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "criteria_current": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CriteriaVersion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "criteria_history": {
+            "items": {
+              "$ref": "#/components/schemas/CriteriaVersionSummary"
+            },
+            "type": "array",
+            "title": "Criteria History"
+          },
+          "readiness": {
+            "$ref": "#/components/schemas/Readiness"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "market_code",
+          "market_name_zh",
+          "market_data_status",
+          "fastmoss_region",
+          "content_languages",
+          "time_zone",
+          "reporting_currency",
+          "target_list_size",
+          "budget_min",
+          "budget_max",
+          "cost_cap_credits",
+          "status",
+          "confirmed_at",
+          "product_version_id",
+          "product_version_no",
+          "latest_product_version_no",
+          "price_term",
+          "criteria_draft",
+          "criteria_current",
+          "criteria_history",
+          "readiness"
+        ],
+        "title": "CampaignMarketView"
+      },
+      "CampaignSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "product_name": {
+            "type": "string",
+            "title": "Product Name"
+          },
+          "product_sku": {
+            "type": "string",
+            "title": "Product Sku"
+          },
+          "market_code": {
+            "type": "string",
+            "title": "Market Code"
+          },
+          "market_name_zh": {
+            "type": "string",
+            "title": "Market Name Zh"
+          },
+          "reporting_currency": {
+            "type": "string",
+            "title": "Reporting Currency"
+          },
+          "time_zone": {
+            "type": "string",
+            "title": "Time Zone"
+          },
+          "goal": {
+            "type": "string",
+            "enum": [
+              "sales",
+              "content",
+              "awareness"
+            ],
+            "title": "Goal"
+          },
+          "market_status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "ready"
+            ],
+            "title": "Market Status"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "title": "Status"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "product_name",
+          "product_sku",
+          "market_code",
+          "market_name_zh",
+          "reporting_currency",
+          "time_zone",
+          "goal",
+          "market_status",
+          "status",
+          "start_date",
+          "end_date",
+          "updated_at"
+        ],
+        "title": "CampaignSummary"
+      },
+      "CampaignUpdate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "goal": {
+            "type": "string",
+            "enum": [
+              "sales",
+              "content",
+              "awareness"
+            ],
+            "title": "Goal"
+          },
+          "collaboration_type": {
+            "type": "string",
+            "enum": [
+              "free_sample",
+              "paid",
+              "commission",
+              "hybrid"
+            ],
+            "title": "Collaboration Type"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Notes",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "goal",
+          "collaboration_type"
+        ],
+        "title": "CampaignUpdate"
+      },
       "CreateJobRequest": {
         "properties": {
           "kind": {
@@ -465,6 +2103,222 @@
         },
         "type": "object",
         "title": "CreateJobRequest"
+      },
+      "CriteriaIn": {
+        "properties": {
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/Criterion"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "title": "Criteria"
+          },
+          "search": {
+            "$ref": "#/components/schemas/SearchInput"
+          }
+        },
+        "type": "object",
+        "title": "CriteriaIn"
+      },
+      "CriteriaVersion": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "version_no": {
+            "type": "integer",
+            "title": "Version No"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "confirmed",
+              "superseded"
+            ],
+            "title": "Status"
+          },
+          "product_version_id": {
+            "type": "string",
+            "title": "Product Version Id"
+          },
+          "product_version_no": {
+            "type": "integer",
+            "title": "Product Version No"
+          },
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/Criterion"
+            },
+            "type": "array",
+            "title": "Criteria"
+          },
+          "search": {
+            "$ref": "#/components/schemas/SearchInput"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "confirmed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "version_no",
+          "status",
+          "product_version_id",
+          "product_version_no",
+          "criteria",
+          "search",
+          "created_at",
+          "confirmed_at"
+        ],
+        "title": "CriteriaVersion"
+      },
+      "CriteriaVersionSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "version_no": {
+            "type": "integer",
+            "title": "Version No"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "confirmed",
+              "superseded"
+            ],
+            "title": "Status"
+          },
+          "product_version_no": {
+            "type": "integer",
+            "title": "Product Version No"
+          },
+          "confirmed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "version_no",
+          "status",
+          "product_version_no",
+          "confirmed_at"
+        ],
+        "title": "CriteriaVersionSummary"
+      },
+      "Criterion": {
+        "properties": {
+          "criterion_id": {
+            "type": "string",
+            "title": "Criterion Id"
+          },
+          "field_key": {
+            "type": "string",
+            "title": "Field Key"
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "between",
+              "gte",
+              "lte",
+              "eq",
+              "in"
+            ],
+            "title": "Operator"
+          },
+          "expected": {
+            "title": "Expected"
+          },
+          "hardness": {
+            "type": "string",
+            "enum": [
+              "hard",
+              "soft"
+            ],
+            "title": "Hardness"
+          },
+          "unknown_policy": {
+            "type": "string",
+            "enum": [
+              "keep",
+              "exclude"
+            ],
+            "title": "Unknown Policy",
+            "description": "数据未知时：keep 保留为“待核实”，exclude 排除（仅硬条件可选）",
+            "default": "keep"
+          },
+          "provenance": {
+            "type": "string",
+            "enum": [
+              "user",
+              "model_suggested"
+            ],
+            "title": "Provenance",
+            "default": "user"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "field_key",
+          "operator",
+          "expected",
+          "hardness"
+        ],
+        "title": "Criterion"
+      },
+      "DraftIn": {
+        "properties": {
+          "facts": {
+            "$ref": "#/components/schemas/ProductFacts"
+          },
+          "market_terms": {
+            "items": {
+              "$ref": "#/components/schemas/MarketTermIn"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Market Terms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "facts"
+        ],
+        "title": "DraftIn"
       },
       "ExternalCheck": {
         "properties": {
@@ -588,6 +2442,120 @@
         ],
         "title": "FastMossSettingsView"
       },
+      "FieldOption": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "label"
+        ],
+        "title": "FieldOption"
+      },
+      "FieldSpec": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "value_type": {
+            "type": "string",
+            "enum": [
+              "int_range",
+              "int",
+              "money",
+              "percent",
+              "enum",
+              "enum_multi",
+              "bool"
+            ],
+            "title": "Value Type"
+          },
+          "operators": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "between",
+                "gte",
+                "lte",
+                "eq",
+                "in"
+              ]
+            },
+            "type": "array",
+            "title": "Operators"
+          },
+          "support": {
+            "type": "string",
+            "enum": [
+              "search_filter",
+              "result_field",
+              "not_provided"
+            ],
+            "title": "Support"
+          },
+          "support_label": {
+            "type": "string",
+            "title": "Support Label"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/FieldOption"
+            },
+            "type": "array",
+            "title": "Options"
+          },
+          "data_quality_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Quality Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "description",
+          "value_type",
+          "operators",
+          "support",
+          "support_label"
+        ],
+        "title": "FieldSpec"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -630,6 +2598,24 @@
           "checks"
         ],
         "title": "Health"
+      },
+      "Issue": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Issue"
       },
       "JobView": {
         "properties": {
@@ -971,6 +2957,649 @@
         ],
         "title": "Market"
       },
+      "MarketSettingsIn": {
+        "properties": {
+          "target_list_size": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 500.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target List Size",
+            "description": "目标名单数量"
+          },
+          "budget_min": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{1,9}(\\.\\d{1,2})?$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Min",
+            "description": "预算下限（站点结算币种）"
+          },
+          "budget_max": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{1,9}(\\.\\d{1,2})?$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Max",
+            "description": "预算上限（站点结算币种）"
+          },
+          "cost_cap_credits": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Cap Credits",
+            "description": "本任务 FastMoss 额度上限"
+          }
+        },
+        "type": "object",
+        "title": "MarketSettingsIn"
+      },
+      "MarketTerm": {
+        "properties": {
+          "market_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "title": "Market Code"
+          },
+          "price_status": {
+            "type": "string",
+            "enum": [
+              "known",
+              "unknown"
+            ],
+            "title": "Price Status"
+          },
+          "price_amount": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{1,9}(\\.\\d{1,2})?$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Amount"
+          },
+          "sample_policy": {
+            "type": "string",
+            "enum": [
+              "free",
+              "paid",
+              "none",
+              "unknown"
+            ],
+            "title": "Sample Policy",
+            "default": "unknown"
+          },
+          "commission_min_pct": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(100(\\.0{1,2})?|\\d{1,2}(\\.\\d{1,2})?)$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commission Min Pct"
+          },
+          "commission_max_pct": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(100(\\.0{1,2})?|\\d{1,2}(\\.\\d{1,2})?)$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commission Max Pct"
+          },
+          "quote_valid_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quote Valid Until"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Notes",
+            "default": ""
+          },
+          "price_currency": {
+            "type": "string",
+            "title": "Price Currency",
+            "description": "站点结算币种，由站点目录决定，不能手填"
+          }
+        },
+        "type": "object",
+        "required": [
+          "market_code",
+          "price_status",
+          "price_currency"
+        ],
+        "title": "MarketTerm"
+      },
+      "MarketTermIn": {
+        "properties": {
+          "market_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "title": "Market Code"
+          },
+          "price_status": {
+            "type": "string",
+            "enum": [
+              "known",
+              "unknown"
+            ],
+            "title": "Price Status"
+          },
+          "price_amount": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{1,9}(\\.\\d{1,2})?$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Amount"
+          },
+          "sample_policy": {
+            "type": "string",
+            "enum": [
+              "free",
+              "paid",
+              "none",
+              "unknown"
+            ],
+            "title": "Sample Policy",
+            "default": "unknown"
+          },
+          "commission_min_pct": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(100(\\.0{1,2})?|\\d{1,2}(\\.\\d{1,2})?)$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commission Min Pct"
+          },
+          "commission_max_pct": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(100(\\.0{1,2})?|\\d{1,2}(\\.\\d{1,2})?)$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commission Max Pct"
+          },
+          "quote_valid_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quote Valid Until"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Notes",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "market_code",
+          "price_status"
+        ],
+        "title": "MarketTermIn"
+      },
+      "ProductCreate": {
+        "properties": {
+          "sku": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sku",
+          "name"
+        ],
+        "title": "ProductCreate"
+      },
+      "ProductDetail": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "title": "Status"
+          },
+          "current_version_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Version No"
+          },
+          "has_draft": {
+            "type": "boolean",
+            "title": "Has Draft"
+          },
+          "market_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Market Codes",
+            "description": "当前确认版本中有价格条款的站点"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "current": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductVersion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "draft": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductVersion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/VersionSummary"
+            },
+            "type": "array",
+            "title": "Versions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "sku",
+          "name",
+          "status",
+          "current_version_no",
+          "has_draft",
+          "market_codes",
+          "updated_at",
+          "current",
+          "draft",
+          "versions"
+        ],
+        "title": "ProductDetail"
+      },
+      "ProductFacts": {
+        "properties": {
+          "summary": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Summary",
+            "description": "一句话介绍产品是什么、解决什么问题",
+            "default": ""
+          },
+          "selling_points": {
+            "items": {
+              "type": "string",
+              "maxLength": 300,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Selling Points",
+            "description": "主要卖点"
+          },
+          "use_scenarios": {
+            "items": {
+              "type": "string",
+              "maxLength": 300,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Use Scenarios",
+            "description": "使用场景"
+          },
+          "target_customers": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Target Customers",
+            "description": "目标客户",
+            "default": ""
+          },
+          "forbidden_claims": {
+            "items": {
+              "type": "string",
+              "maxLength": 300,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 30,
+            "title": "Forbidden Claims",
+            "description": "禁用表述（不得宣称的功效等）"
+          },
+          "reference_links": {
+            "items": {
+              "type": "string",
+              "maxLength": 500,
+              "pattern": "^https?://"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Reference Links",
+            "description": "参考链接（商品页、参考视频）"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Notes",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "ProductFacts",
+        "description": "规范事实。影响筛选与拍摄包的内容都在这里，确认后不可修改。"
+      },
+      "ProductRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "sku",
+          "name"
+        ],
+        "title": "ProductRef"
+      },
+      "ProductSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "title": "Status"
+          },
+          "current_version_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Version No"
+          },
+          "has_draft": {
+            "type": "boolean",
+            "title": "Has Draft"
+          },
+          "market_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Market Codes",
+            "description": "当前确认版本中有价格条款的站点"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "sku",
+          "name",
+          "status",
+          "current_version_no",
+          "has_draft",
+          "market_codes",
+          "updated_at"
+        ],
+        "title": "ProductSummary"
+      },
+      "ProductUpdate": {
+        "properties": {
+          "sku": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sku",
+          "name"
+        ],
+        "title": "ProductUpdate"
+      },
+      "ProductVersion": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "version_no": {
+            "type": "integer",
+            "title": "Version No"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "confirmed",
+              "superseded"
+            ],
+            "title": "Status"
+          },
+          "facts": {
+            "$ref": "#/components/schemas/ProductFacts"
+          },
+          "market_terms": {
+            "items": {
+              "$ref": "#/components/schemas/MarketTerm"
+            },
+            "type": "array",
+            "title": "Market Terms"
+          },
+          "content_hash": {
+            "type": "string",
+            "title": "Content Hash"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "confirmed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "version_no",
+          "status",
+          "facts",
+          "market_terms",
+          "content_hash",
+          "created_at",
+          "confirmed_at"
+        ],
+        "title": "ProductVersion"
+      },
+      "Readiness": {
+        "properties": {
+          "ready": {
+            "type": "boolean",
+            "title": "Ready",
+            "description": "没有阻断项，可以确认"
+          },
+          "blockers": {
+            "items": {
+              "$ref": "#/components/schemas/Issue"
+            },
+            "type": "array",
+            "title": "Blockers"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/Issue"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ready",
+          "blockers",
+          "warnings"
+        ],
+        "title": "Readiness"
+      },
+      "SearchInput": {
+        "properties": {
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "title": "Keywords",
+            "description": "搜索关键词（产品、品类、内容主题）"
+          }
+        },
+        "type": "object",
+        "title": "SearchInput"
+      },
       "SettingsView": {
         "properties": {
           "llm": {
@@ -1026,6 +3655,51 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VersionSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "version_no": {
+            "type": "integer",
+            "title": "Version No"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "confirmed",
+              "superseded"
+            ],
+            "title": "Status"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "confirmed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "version_no",
+          "status",
+          "created_at",
+          "confirmed_at"
+        ],
+        "title": "VersionSummary"
       }
     }
   }
