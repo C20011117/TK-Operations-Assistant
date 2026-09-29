@@ -22,7 +22,8 @@ def _ensure_backend() -> None:
 
 FASTMOSS_API_KEY = "fastmoss_api_key"
 LLM_API_KEY = "llm_api_key"
-KNOWN = (FASTMOSS_API_KEY, LLM_API_KEY)
+PII_DATA_KEY = "pii_data_key"  # 个人数据字段加密用的数据密钥（base64），见 platform/crypto
+KNOWN = (FASTMOSS_API_KEY, LLM_API_KEY, PII_DATA_KEY)
 
 
 def get_secret(name: str) -> str:

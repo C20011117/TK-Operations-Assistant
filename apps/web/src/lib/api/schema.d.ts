@@ -608,6 +608,246 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/campaign-markets/{cm_id}/creator-decisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 本任务站点每位达人的当前决定 */
+        get: operations["decisions_api_v1_campaign_markets__cm_id__creator_decisions_get"];
+        put?: never;
+        /** 记录对候选的决定（保留 / 待核实 / 排除 / 重新考虑）；追加保存，不覆盖历史 */
+        post: operations["decide_api_v1_campaign_markets__cm_id__creator_decisions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign-markets/{cm_id}/collaborations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 准备合作（需要先标记“保留”）；同一达人在同一任务站点只有一条合作，重复提交返回已有的 */
+        post: operations["create_collab_api_v1_campaign_markets__cm_id__collaborations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collaborations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 我的合作列表 */
+        get: operations["collabs_api_v1_collaborations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collaborations/{collab_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 合作详情（状态历史、约定、寄样） */
+        get: operations["collab_api_v1_collaborations__collab_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collaborations/{collab_id}/transitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 推进合作状态（联系中 / 洽谈中 / 关闭）；关闭时未寄出的寄样单一并取消 */
+        post: operations["transition_api_v1_collaborations__collab_id__transitions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collaborations/{collab_id}/confirm-agreement": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 本人记录双方已达成的约定（方式、日期、新视频数量、条款）；之后才能寄样 */
+        post: operations["agree_api_v1_collaborations__collab_id__confirm_agreement_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collaborations/{collab_id}/shipments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 创建寄样单（草稿）；收件信息加密保存；同一 Idempotency-Key 重复提交返回同一张 */
+        post: operations["create_shipment_api_v1_collaborations__collab_id__shipments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{shipment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 寄样单（收件信息已脱敏） */
+        get: operations["shipment_api_v1_shipments__shipment_id__get"];
+        /** 修改寄样单（寄出前）；已有的确认作废，需要重新核对确认 */
+        put: operations["update_shipment_api_v1_shipments__shipment_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{shipment_id}/confirmation-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 冻结当前寄样内容，返回核对摘要和哈希（本身不执行任何动作） */
+        post: operations["preview_api_v1_shipments__shipment_id__confirmation_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{shipment_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 本人确认寄样：提交核对时看到的哈希和版本；内容变化或重复确认都会被拒绝 */
+        post: operations["confirm_api_v1_shipments__shipment_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{shipment_id}/register-dispatch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 人工登记已寄出（使用确认，只能一次）；不调用物流接口，签收状态保持未知 */
+        post: operations["dispatch_api_v1_shipments__shipment_id__register_dispatch_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{shipment_id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 登记物流节点（运输中 / 已签收 / 异常 / 退回）；按发生时间决定当前签收状态 */
+        post: operations["add_event_api_v1_shipments__shipment_id__events_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{shipment_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 取消寄样单（寄出前） */
+        post: operations["cancel_api_v1_shipments__shipment_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{shipment_id}/recipient": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 查看完整收件信息和快递单号（仅本机界面使用，用于填写快递单） */
+        get: operations["recipient_api_v1_shipments__shipment_id__recipient_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -628,6 +868,51 @@ export interface components {
              * @description 模型给出但没有证据支持的推断
              */
             unsupported?: string[];
+        };
+        /**
+         * AgreementIn
+         * @description 本人记录双方已达成的约定：怎么谈成的、哪天、约定了什么。不代表达人已签收或已履约。
+         */
+        AgreementIn: {
+            /**
+             * Agreed Via
+             * @enum {string}
+             */
+            agreed_via: "tiktok_message" | "email" | "whatsapp" | "phone" | "other";
+            /**
+             * Agreed On
+             * Format: date
+             */
+            agreed_on: string;
+            /**
+             * Agreed Video Count
+             * @description 约定的新视频数量
+             */
+            agreed_video_count: number;
+            /**
+             * Sample Included
+             * @default true
+             */
+            sample_included: boolean;
+            /** Terms Note */
+            terms_note: string;
+            /** Revision */
+            revision?: number | null;
+        };
+        /** AgreementView */
+        AgreementView: {
+            /** Agreed Via */
+            agreed_via: string;
+            /** Agreed On */
+            agreed_on: string;
+            /** Agreed Video Count */
+            agreed_video_count: number;
+            /** Sample Included */
+            sample_included: boolean;
+            /** Terms Note */
+            terms_note: string;
+            /** Recorded At */
+            recorded_at: string;
         };
         /** AppInfo */
         AppInfo: {
@@ -875,6 +1160,142 @@ export interface components {
              */
             query: string[];
         };
+        /** CollabEventView */
+        CollabEventView: {
+            /** Id */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** From Status */
+            from_status: string | null;
+            /** To Status */
+            to_status: string | null;
+            /** Note */
+            note: string;
+            /** Created At */
+            created_at: string;
+        };
+        /** CollaborationCreate */
+        CollaborationCreate: {
+            /** Creator Id */
+            creator_id: string;
+            /** Run Id */
+            run_id?: string | null;
+            /** Evaluation Id */
+            evaluation_id?: string | null;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+        };
+        /** CollaborationDetail */
+        CollaborationDetail: {
+            /** Id */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "planned" | "contacting" | "negotiating" | "agreed" | "in_progress" | "completed" | "closed";
+            /** Closed Reason */
+            closed_reason: string | null;
+            creator: components["schemas"]["CreatorBrief"];
+            /** Campaign Id */
+            campaign_id: string;
+            /** Campaign Name */
+            campaign_name: string;
+            /** Campaign Market Id */
+            campaign_market_id: string;
+            /** Market Code */
+            market_code: string;
+            /** Product Name */
+            product_name: string;
+            /** Product Version No */
+            product_version_no: number;
+            /** Agreed At */
+            agreed_at: string | null;
+            /**
+             * Next Step
+             * @description 下一步该做什么（中文提示）
+             */
+            next_step: string | null;
+            /**
+             * Shipment Status
+             * @description 最近一张寄样单的状态
+             */
+            shipment_status: string | null;
+            /** Delivery Status */
+            delivery_status: string | null;
+            /** Revision */
+            revision: number;
+            /** Created At */
+            created_at: string;
+            /** Updated At */
+            updated_at: string;
+            /** Reporting Currency */
+            reporting_currency: string;
+            /** Time Zone */
+            time_zone: string;
+            agreement: components["schemas"]["AgreementView"] | null;
+            /** Agreed Video Count */
+            agreed_video_count: number | null;
+            /** Allowed Transitions */
+            allowed_transitions: string[];
+            /** Can Confirm Agreement */
+            can_confirm_agreement: boolean;
+            /** Can Create Shipment */
+            can_create_shipment: boolean;
+            /** Events */
+            events: components["schemas"]["CollabEventView"][];
+            /** Shipments */
+            shipments: components["schemas"]["ShipmentView"][];
+        };
+        /** CollaborationSummary */
+        CollaborationSummary: {
+            /** Id */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "planned" | "contacting" | "negotiating" | "agreed" | "in_progress" | "completed" | "closed";
+            /** Closed Reason */
+            closed_reason: string | null;
+            creator: components["schemas"]["CreatorBrief"];
+            /** Campaign Id */
+            campaign_id: string;
+            /** Campaign Name */
+            campaign_name: string;
+            /** Campaign Market Id */
+            campaign_market_id: string;
+            /** Market Code */
+            market_code: string;
+            /** Product Name */
+            product_name: string;
+            /** Product Version No */
+            product_version_no: number;
+            /** Agreed At */
+            agreed_at: string | null;
+            /**
+             * Next Step
+             * @description 下一步该做什么（中文提示）
+             */
+            next_step: string | null;
+            /**
+             * Shipment Status
+             * @description 最近一张寄样单的状态
+             */
+            shipment_status: string | null;
+            /** Delivery Status */
+            delivery_status: string | null;
+            /** Revision */
+            revision: number;
+            /** Created At */
+            created_at: string;
+            /** Updated At */
+            updated_at: string;
+        };
         /**
          * Competitor
          * @description 竞品：卖过它的达人会优先进入候选。product_id 可以直接粘贴 TikTok 商品链接。
@@ -934,6 +1355,51 @@ export interface components {
              */
             category_path: string | null;
         };
+        /** ConfirmIn */
+        ConfirmIn: {
+            /** Payload Version */
+            payload_version: number;
+            /** Payload Hash */
+            payload_hash: string;
+        };
+        /** ConfirmationPreview */
+        ConfirmationPreview: {
+            /** Shipment Id */
+            shipment_id: string;
+            /** Payload Version */
+            payload_version: number;
+            /**
+             * Payload Hash
+             * @description 确认时原样提交；内容变化后哈希不同，旧确认失效
+             */
+            payload_hash: string;
+            /**
+             * Summary
+             * @description 核对摘要（收件信息已脱敏）
+             */
+            summary: {
+                [key: string]: unknown;
+            };
+            /** Expires In Days */
+            expires_in_days: number;
+        };
+        /** ConfirmationView */
+        ConfirmationView: {
+            /** Id */
+            id: string;
+            /** Payload Version */
+            payload_version: number;
+            /** Confirmed At */
+            confirmed_at: string;
+            /** Expires At */
+            expires_at: string;
+            /** Consumed At */
+            consumed_at: string | null;
+            /** Revoked At */
+            revoked_at: string | null;
+            /** Valid */
+            valid: boolean;
+        };
         /** CreateJobRequest */
         CreateJobRequest: {
             /**
@@ -946,6 +1412,19 @@ export interface components {
             params?: {
                 [key: string]: unknown;
             };
+        };
+        /** CreatorBrief */
+        CreatorBrief: {
+            /** Id */
+            id: string;
+            /** Unique Id */
+            unique_id: string | null;
+            /** Nickname */
+            nickname: string | null;
+            /** Region */
+            region: string | null;
+            /** Profile Url */
+            profile_url: string | null;
         };
         /** CreatorRef */
         CreatorRef: {
@@ -1036,6 +1515,73 @@ export interface components {
              * @enum {string}
              */
             provenance: "user" | "model_suggested";
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+        };
+        /** DecisionIn */
+        DecisionIn: {
+            /** Creator Id */
+            creator_id: string;
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "keep" | "needs_verification" | "exclude" | "reconsider";
+            /** Reason Code */
+            reason_code?: ("good_fit" | "category_match" | "competitor_seller" | "off_target" | "audience_mismatch" | "too_small" | "too_expensive" | "data_doubt" | "not_eligible" | "other") | null;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /** Run Id */
+            run_id?: string | null;
+            /** Evaluation Id */
+            evaluation_id?: string | null;
+        };
+        /** DecisionView */
+        DecisionView: {
+            /** Id */
+            id: string;
+            /** Campaign Market Id */
+            campaign_market_id: string;
+            /** Creator Id */
+            creator_id: string;
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "keep" | "needs_verification" | "exclude" | "reconsider";
+            /** Reason Code */
+            reason_code: string | null;
+            /** Note */
+            note: string;
+            /** Run Id */
+            run_id: string | null;
+            /** Evaluation Id */
+            evaluation_id: string | null;
+            /** Created At */
+            created_at: string;
+            /**
+             * Collaboration Id
+             * @description 该达人在本任务站点已有的合作
+             */
+            collaboration_id?: string | null;
+        };
+        /**
+         * DispatchIn
+         * @description 人工登记“已寄出”：只记录已发生的事实，不调用任何物流接口。
+         */
+        DispatchIn: {
+            /** Dispatched At */
+            dispatched_at: string;
+            /** Carrier */
+            carrier?: string | null;
+            /** Tracking Number */
+            tracking_number?: string | null;
             /**
              * Note
              * @default
@@ -1598,6 +2144,33 @@ export interface components {
             /** Warnings */
             warnings: components["schemas"]["Issue"][];
         };
+        /** RecipientIn */
+        RecipientIn: {
+            /** Name */
+            name: string;
+            /** Phone */
+            phone?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Address Line1 */
+            address_line1: string;
+            /** Address Line2 */
+            address_line2?: string | null;
+            /** City */
+            city: string;
+            /** Region */
+            region?: string | null;
+            /** Postcode */
+            postcode: string;
+            /** Country Code */
+            country_code: string;
+        };
+        /** RecipientView */
+        RecipientView: {
+            recipient: components["schemas"]["RecipientIn"];
+            /** Tracking Number */
+            tracking_number: string | null;
+        };
         /** RecommendationCard */
         RecommendationCard: {
             /** Evaluation Id */
@@ -1748,6 +2321,153 @@ export interface components {
             llm: components["schemas"]["LLMSettingsView"];
             fastmoss: components["schemas"]["FastMossSettingsView"];
         };
+        /** ShipmentEventIn */
+        ShipmentEventIn: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "in_transit" | "delivered" | "exception" | "returned";
+            /** Occurred At */
+            occurred_at: string;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+        };
+        /** ShipmentEventView */
+        ShipmentEventView: {
+            /** Id */
+            id: string;
+            /** Source */
+            source: string;
+            /** Status */
+            status: string;
+            /** Occurred At */
+            occurred_at: string;
+            /** Observed At */
+            observed_at: string;
+            /** Note */
+            note: string;
+        };
+        /** ShipmentIn */
+        ShipmentIn: {
+            /**
+             * Kind
+             * @default initial_sample
+             * @enum {string}
+             */
+            kind: "initial_sample" | "replacement" | "additional_sample";
+            /** Items */
+            items: components["schemas"]["ShipmentItemIn"][];
+            /** @description 创建时必填；修改时留空表示不变 */
+            recipient?: components["schemas"]["RecipientIn"] | null;
+            /**
+             * Cost Cap Amount
+             * @description 本次寄样允许的样品 + 运费上限；不知道就留空
+             */
+            cost_cap_amount?: string | null;
+            /**
+             * Currency
+             * @description 默认用任务站点的结算币种
+             */
+            currency?: string | null;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+        };
+        /** ShipmentItem */
+        ShipmentItem: {
+            /** Sku */
+            sku: string;
+            /** Variant */
+            variant: string | null;
+            /** Quantity */
+            quantity: number;
+            /** Unit Cost */
+            unit_cost: string | null;
+        };
+        /** ShipmentItemIn */
+        ShipmentItemIn: {
+            /** Sku */
+            sku: string;
+            /** Variant */
+            variant?: string | null;
+            /** Quantity */
+            quantity: number;
+            /**
+             * Unit Cost
+             * @description 单件样品成本（寄样单币种）；不知道就留空，显示为未知
+             */
+            unit_cost?: string | null;
+        };
+        /** ShipmentView */
+        ShipmentView: {
+            /** Id */
+            id: string;
+            /** Collaboration Id */
+            collaboration_id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "initial_sample" | "replacement" | "additional_sample";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "awaiting_confirmation" | "confirmed" | "dispatched" | "cancelled";
+            /**
+             * Delivery Status
+             * @description 签收状态：没有物流节点时是 unknown，不会自动变成已签收
+             * @enum {string}
+             */
+            delivery_status: "unknown" | "in_transit" | "delivered" | "exception" | "returned";
+            /** Items */
+            items: components["schemas"]["ShipmentItem"][];
+            /**
+             * Items Cost Total
+             * @description 样品成本合计；任一明细成本未知时为空
+             */
+            items_cost_total: string | null;
+            /** Cost Cap Amount */
+            cost_cap_amount: string | null;
+            /** Currency */
+            currency: string;
+            /**
+             * Recipient Masked
+             * @description 脱敏后的收件摘要
+             */
+            recipient_masked: string;
+            /** Recipient Country */
+            recipient_country: string | null;
+            /** Note */
+            note: string;
+            /** Payload Version */
+            payload_version: number;
+            /** Carrier */
+            carrier: string | null;
+            /** Tracking Masked */
+            tracking_masked: string | null;
+            /** Dispatched At */
+            dispatched_at: string | null;
+            /** Delivered At */
+            delivered_at: string | null;
+            /** Action Status */
+            action_status: string | null;
+            confirmation: components["schemas"]["ConfirmationView"] | null;
+            /** Events */
+            events: components["schemas"]["ShipmentEventView"][];
+            /** Next Action */
+            next_action: ("preview" | "confirm" | "register_dispatch" | "record_delivery") | null;
+            /** Created At */
+            created_at: string;
+            /** Updated At */
+            updated_at: string;
+        };
         /** SnapshotView */
         SnapshotView: {
             /** Id */
@@ -1764,6 +2484,26 @@ export interface components {
             };
             /** Created At */
             created_at: string;
+        };
+        /** TransitionIn */
+        TransitionIn: {
+            /**
+             * To
+             * @enum {string}
+             */
+            to: "contacting" | "negotiating" | "closed";
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /** Closed Reason */
+            closed_reason?: ("no_reply" | "declined" | "over_budget" | "schedule_conflict" | "not_suitable" | "other") | null;
+            /**
+             * Revision
+             * @description 看到的版本号；与当前不一致时拒绝（避免覆盖别处的修改）
+             */
+            revision?: number | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -3139,6 +3879,545 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CompetitorSuggestionsView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decisions_api_v1_campaign_markets__cm_id__creator_decisions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_api_v1_campaign_markets__cm_id__creator_decisions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_collab_api_v1_campaign_markets__cm_id__collaborations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CollaborationCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    collabs_api_v1_collaborations_get: {
+        parameters: {
+            query?: {
+                status?: ("planned" | "contacting" | "negotiating" | "agreed" | "in_progress" | "completed" | "closed") | null;
+                campaign_market_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    collab_api_v1_collaborations__collab_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collab_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_api_v1_collaborations__collab_id__transitions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collab_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransitionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    agree_api_v1_collaborations__collab_id__confirm_agreement_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collab_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgreementIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_shipment_api_v1_collaborations__collab_id__shipments_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path: {
+                collab_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShipmentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    shipment_api_v1_shipments__shipment_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_shipment_api_v1_shipments__shipment_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShipmentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_api_v1_shipments__shipment_id__confirmation_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfirmationPreview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_api_v1_shipments__shipment_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dispatch_api_v1_shipments__shipment_id__register_dispatch_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DispatchIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_event_api_v1_shipments__shipment_id__events_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShipmentEventIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_api_v1_shipments__shipment_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recipient_api_v1_shipments__shipment_id__recipient_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipientView"];
                 };
             };
             /** @description Validation Error */

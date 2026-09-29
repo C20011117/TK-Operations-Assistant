@@ -7,6 +7,7 @@ const nav = [
   { to: "/", label: "我的工作台", end: true },
   { to: "/products", label: "产品档案", end: false },
   { to: "/campaigns", label: "找人任务", end: false },
+  { to: "/collaborations", label: "我的合作", end: false },
   { to: "/markets", label: "站点目录", end: false },
   { to: "/system", label: "系统状态", end: false },
   { to: "/settings", label: "设置", end: false },

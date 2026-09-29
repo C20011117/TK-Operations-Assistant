@@ -77,3 +77,62 @@ export function compact(v: string | null | undefined): string {
   if (n >= 10000) return `${(n / 10000).toFixed(n >= 100000 ? 0 : 1)} 万`;
   return n.toLocaleString("zh-CN", { maximumFractionDigits: 2 });
 }
+
+// ---------------- M3 合作与寄样 ----------------
+export const decisionLabels = {
+  keep: "保留",
+  needs_verification: "待核实",
+  exclude: "排除",
+  reconsider: "重新考虑",
+} as const;
+export const decisionReasonLabels = {
+  good_fit: "内容与产品契合",
+  category_match: "带过同类商品",
+  competitor_seller: "卖过竞品",
+  off_target: "方向不对口",
+  audience_mismatch: "受众不匹配",
+  too_small: "体量太小",
+  too_expensive: "预计报价过高",
+  data_doubt: "数据可疑",
+  not_eligible: "可能没有该站点带货资格",
+  other: "其他",
+} as const;
+export const collabStatusLabels = {
+  planned: "准备联系",
+  contacting: "联系中",
+  negotiating: "洽谈中",
+  agreed: "已达成约定",
+  in_progress: "合作进行中",
+  completed: "已完成",
+  closed: "已关闭",
+} as const;
+export const closedReasonLabels = {
+  no_reply: "一直没回复",
+  declined: "对方拒绝",
+  over_budget: "报价超预算",
+  schedule_conflict: "档期不合",
+  not_suitable: "判断不合适",
+  other: "其他",
+} as const;
+export const agreedViaLabels = {
+  tiktok_message: "TikTok 私信",
+  email: "邮件",
+  whatsapp: "WhatsApp",
+  phone: "电话",
+  other: "其他",
+} as const;
+export const shipmentKindLabels = { initial_sample: "首次寄样", replacement: "补寄", additional_sample: "追加样品" } as const;
+export const shipmentStatusLabels = {
+  draft: "草稿",
+  awaiting_confirmation: "待确认",
+  confirmed: "已确认，待寄出",
+  dispatched: "已寄出",
+  cancelled: "已取消",
+} as const;
+export const deliveryLabels = {
+  unknown: "签收未知",
+  in_transit: "运输中",
+  delivered: "已签收",
+  exception: "物流异常",
+  returned: "已退回",
+} as const;

@@ -1871,6 +1871,837 @@
           }
         }
       }
+    },
+    "/api/v1/campaign-markets/{cm_id}/creator-decisions": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "记录对候选的决定（保留 / 待核实 / 排除 / 重新考虑）；追加保存，不覆盖历史",
+        "operationId": "decide_api_v1_campaign_markets__cm_id__creator_decisions_post",
+        "parameters": [
+          {
+            "name": "cm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "本任务站点每位达人的当前决定",
+        "operationId": "decisions_api_v1_campaign_markets__cm_id__creator_decisions_get",
+        "parameters": [
+          {
+            "name": "cm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DecisionView"
+                  },
+                  "title": "Response Decisions Api V1 Campaign Markets  Cm Id  Creator Decisions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaign-markets/{cm_id}/collaborations": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "准备合作（需要先标记“保留”）；同一达人在同一任务站点只有一条合作，重复提交返回已有的",
+        "operationId": "create_collab_api_v1_campaign_markets__cm_id__collaborations_post",
+        "parameters": [
+          {
+            "name": "cm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CollaborationCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollaborationDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/collaborations": {
+      "get": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "我的合作列表",
+        "operationId": "collabs_api_v1_collaborations_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "planned",
+                    "contacting",
+                    "negotiating",
+                    "agreed",
+                    "in_progress",
+                    "completed",
+                    "closed"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "campaign_market_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Campaign Market Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CollaborationSummary"
+                  },
+                  "title": "Response Collabs Api V1 Collaborations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/collaborations/{collab_id}": {
+      "get": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "合作详情（状态历史、约定、寄样）",
+        "operationId": "collab_api_v1_collaborations__collab_id__get",
+        "parameters": [
+          {
+            "name": "collab_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Collab Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollaborationDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/collaborations/{collab_id}/transitions": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "推进合作状态（联系中 / 洽谈中 / 关闭）；关闭时未寄出的寄样单一并取消",
+        "operationId": "transition_api_v1_collaborations__collab_id__transitions_post",
+        "parameters": [
+          {
+            "name": "collab_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Collab Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollaborationDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/collaborations/{collab_id}/confirm-agreement": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "本人记录双方已达成的约定（方式、日期、新视频数量、条款）；之后才能寄样",
+        "operationId": "agree_api_v1_collaborations__collab_id__confirm_agreement_post",
+        "parameters": [
+          {
+            "name": "collab_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Collab Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgreementIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollaborationDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/collaborations/{collab_id}/shipments": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "创建寄样单（草稿）；收件信息加密保存；同一 Idempotency-Key 重复提交返回同一张",
+        "operationId": "create_shipment_api_v1_collaborations__collab_id__shipments_post",
+        "parameters": [
+          {
+            "name": "collab_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Collab Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shipments/{shipment_id}": {
+      "get": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "寄样单（收件信息已脱敏）",
+        "operationId": "shipment_api_v1_shipments__shipment_id__get",
+        "parameters": [
+          {
+            "name": "shipment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Shipment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "修改寄样单（寄出前）；已有的确认作废，需要重新核对确认",
+        "operationId": "update_shipment_api_v1_shipments__shipment_id__put",
+        "parameters": [
+          {
+            "name": "shipment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Shipment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shipments/{shipment_id}/confirmation-preview": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "冻结当前寄样内容，返回核对摘要和哈希（本身不执行任何动作）",
+        "operationId": "preview_api_v1_shipments__shipment_id__confirmation_preview_post",
+        "parameters": [
+          {
+            "name": "shipment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Shipment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmationPreview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shipments/{shipment_id}/confirm": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "本人确认寄样：提交核对时看到的哈希和版本；内容变化或重复确认都会被拒绝",
+        "operationId": "confirm_api_v1_shipments__shipment_id__confirm_post",
+        "parameters": [
+          {
+            "name": "shipment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Shipment Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shipments/{shipment_id}/register-dispatch": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "人工登记已寄出（使用确认，只能一次）；不调用物流接口，签收状态保持未知",
+        "operationId": "dispatch_api_v1_shipments__shipment_id__register_dispatch_post",
+        "parameters": [
+          {
+            "name": "shipment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Shipment Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DispatchIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shipments/{shipment_id}/events": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "登记物流节点（运输中 / 已签收 / 异常 / 退回）；按发生时间决定当前签收状态",
+        "operationId": "add_event_api_v1_shipments__shipment_id__events_post",
+        "parameters": [
+          {
+            "name": "shipment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Shipment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentEventIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shipments/{shipment_id}/cancel": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "取消寄样单（寄出前）",
+        "operationId": "cancel_api_v1_shipments__shipment_id__cancel_post",
+        "parameters": [
+          {
+            "name": "shipment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Shipment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shipments/{shipment_id}/recipient": {
+      "get": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "查看完整收件信息和快递单号（仅本机界面使用，用于填写快递单）",
+        "operationId": "recipient_api_v1_shipments__shipment_id__recipient_get",
+        "parameters": [
+          {
+            "name": "shipment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Shipment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipientView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1932,6 +2763,102 @@
           "summary"
         ],
         "title": "AIView"
+      },
+      "AgreementIn": {
+        "properties": {
+          "agreed_via": {
+            "type": "string",
+            "enum": [
+              "tiktok_message",
+              "email",
+              "whatsapp",
+              "phone",
+              "other"
+            ],
+            "title": "Agreed Via"
+          },
+          "agreed_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Agreed On"
+          },
+          "agreed_video_count": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Agreed Video Count",
+            "description": "约定的新视频数量"
+          },
+          "sample_included": {
+            "type": "boolean",
+            "title": "Sample Included",
+            "default": true
+          },
+          "terms_note": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Terms Note"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision"
+          }
+        },
+        "type": "object",
+        "required": [
+          "agreed_via",
+          "agreed_on",
+          "agreed_video_count",
+          "terms_note"
+        ],
+        "title": "AgreementIn",
+        "description": "本人记录双方已达成的约定：怎么谈成的、哪天、约定了什么。不代表达人已签收或已履约。"
+      },
+      "AgreementView": {
+        "properties": {
+          "agreed_via": {
+            "type": "string",
+            "title": "Agreed Via"
+          },
+          "agreed_on": {
+            "type": "string",
+            "title": "Agreed On"
+          },
+          "agreed_video_count": {
+            "type": "integer",
+            "title": "Agreed Video Count"
+          },
+          "sample_included": {
+            "type": "boolean",
+            "title": "Sample Included"
+          },
+          "terms_note": {
+            "type": "string",
+            "title": "Terms Note"
+          },
+          "recorded_at": {
+            "type": "string",
+            "title": "Recorded At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "agreed_via",
+          "agreed_on",
+          "agreed_video_count",
+          "sample_included",
+          "terms_note",
+          "recorded_at"
+        ],
+        "title": "AgreementView"
       },
       "AppInfo": {
         "properties": {
@@ -2707,6 +3634,442 @@
         ],
         "title": "CategorySuggestionsIn"
       },
+      "CollabEventView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "from_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Status"
+          },
+          "to_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Status"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "from_status",
+          "to_status",
+          "note",
+          "created_at"
+        ],
+        "title": "CollabEventView"
+      },
+      "CollaborationCreate": {
+        "properties": {
+          "creator_id": {
+            "type": "string",
+            "title": "Creator Id"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "evaluation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Id"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "creator_id"
+        ],
+        "title": "CollaborationCreate"
+      },
+      "CollaborationDetail": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "contacting",
+              "negotiating",
+              "agreed",
+              "in_progress",
+              "completed",
+              "closed"
+            ],
+            "title": "Status"
+          },
+          "closed_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed Reason"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/CreatorBrief"
+          },
+          "campaign_id": {
+            "type": "string",
+            "title": "Campaign Id"
+          },
+          "campaign_name": {
+            "type": "string",
+            "title": "Campaign Name"
+          },
+          "campaign_market_id": {
+            "type": "string",
+            "title": "Campaign Market Id"
+          },
+          "market_code": {
+            "type": "string",
+            "title": "Market Code"
+          },
+          "product_name": {
+            "type": "string",
+            "title": "Product Name"
+          },
+          "product_version_no": {
+            "type": "integer",
+            "title": "Product Version No"
+          },
+          "agreed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreed At"
+          },
+          "next_step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Step",
+            "description": "下一步该做什么（中文提示）"
+          },
+          "shipment_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipment Status",
+            "description": "最近一张寄样单的状态"
+          },
+          "delivery_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Status"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "reporting_currency": {
+            "type": "string",
+            "title": "Reporting Currency"
+          },
+          "time_zone": {
+            "type": "string",
+            "title": "Time Zone"
+          },
+          "agreement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgreementView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "agreed_video_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreed Video Count"
+          },
+          "allowed_transitions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Allowed Transitions"
+          },
+          "can_confirm_agreement": {
+            "type": "boolean",
+            "title": "Can Confirm Agreement"
+          },
+          "can_create_shipment": {
+            "type": "boolean",
+            "title": "Can Create Shipment"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/CollabEventView"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "shipments": {
+            "items": {
+              "$ref": "#/components/schemas/ShipmentView"
+            },
+            "type": "array",
+            "title": "Shipments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "closed_reason",
+          "creator",
+          "campaign_id",
+          "campaign_name",
+          "campaign_market_id",
+          "market_code",
+          "product_name",
+          "product_version_no",
+          "agreed_at",
+          "next_step",
+          "shipment_status",
+          "delivery_status",
+          "revision",
+          "created_at",
+          "updated_at",
+          "reporting_currency",
+          "time_zone",
+          "agreement",
+          "agreed_video_count",
+          "allowed_transitions",
+          "can_confirm_agreement",
+          "can_create_shipment",
+          "events",
+          "shipments"
+        ],
+        "title": "CollaborationDetail"
+      },
+      "CollaborationSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "contacting",
+              "negotiating",
+              "agreed",
+              "in_progress",
+              "completed",
+              "closed"
+            ],
+            "title": "Status"
+          },
+          "closed_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed Reason"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/CreatorBrief"
+          },
+          "campaign_id": {
+            "type": "string",
+            "title": "Campaign Id"
+          },
+          "campaign_name": {
+            "type": "string",
+            "title": "Campaign Name"
+          },
+          "campaign_market_id": {
+            "type": "string",
+            "title": "Campaign Market Id"
+          },
+          "market_code": {
+            "type": "string",
+            "title": "Market Code"
+          },
+          "product_name": {
+            "type": "string",
+            "title": "Product Name"
+          },
+          "product_version_no": {
+            "type": "integer",
+            "title": "Product Version No"
+          },
+          "agreed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreed At"
+          },
+          "next_step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Step",
+            "description": "下一步该做什么（中文提示）"
+          },
+          "shipment_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipment Status",
+            "description": "最近一张寄样单的状态"
+          },
+          "delivery_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Status"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "closed_reason",
+          "creator",
+          "campaign_id",
+          "campaign_name",
+          "campaign_market_id",
+          "market_code",
+          "product_name",
+          "product_version_no",
+          "agreed_at",
+          "next_step",
+          "shipment_status",
+          "delivery_status",
+          "revision",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CollaborationSummary"
+      },
       "Competitor": {
         "properties": {
           "product_id": {
@@ -2910,6 +4273,118 @@
         ],
         "title": "CompetitorSuggestionsView"
       },
+      "ConfirmIn": {
+        "properties": {
+          "payload_version": {
+            "type": "integer",
+            "title": "Payload Version"
+          },
+          "payload_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Payload Hash"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payload_version",
+          "payload_hash"
+        ],
+        "title": "ConfirmIn"
+      },
+      "ConfirmationPreview": {
+        "properties": {
+          "shipment_id": {
+            "type": "string",
+            "title": "Shipment Id"
+          },
+          "payload_version": {
+            "type": "integer",
+            "title": "Payload Version"
+          },
+          "payload_hash": {
+            "type": "string",
+            "title": "Payload Hash",
+            "description": "确认时原样提交；内容变化后哈希不同，旧确认失效"
+          },
+          "summary": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Summary",
+            "description": "核对摘要（收件信息已脱敏）"
+          },
+          "expires_in_days": {
+            "type": "integer",
+            "title": "Expires In Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "shipment_id",
+          "payload_version",
+          "payload_hash",
+          "summary",
+          "expires_in_days"
+        ],
+        "title": "ConfirmationPreview"
+      },
+      "ConfirmationView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "payload_version": {
+            "type": "integer",
+            "title": "Payload Version"
+          },
+          "confirmed_at": {
+            "type": "string",
+            "title": "Confirmed At"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
+          },
+          "consumed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consumed At"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          },
+          "valid": {
+            "type": "boolean",
+            "title": "Valid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "payload_version",
+          "confirmed_at",
+          "expires_at",
+          "consumed_at",
+          "revoked_at",
+          "valid"
+        ],
+        "title": "ConfirmationView"
+      },
       "CreateJobRequest": {
         "properties": {
           "kind": {
@@ -2926,6 +4401,67 @@
         },
         "type": "object",
         "title": "CreateJobRequest"
+      },
+      "CreatorBrief": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "unique_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unique Id"
+          },
+          "nickname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nickname"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "profile_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "unique_id",
+          "nickname",
+          "region",
+          "profile_url"
+        ],
+        "title": "CreatorBrief"
       },
       "CreatorRef": {
         "properties": {
@@ -3183,6 +4719,226 @@
           "hardness"
         ],
         "title": "Criterion"
+      },
+      "DecisionIn": {
+        "properties": {
+          "creator_id": {
+            "type": "string",
+            "title": "Creator Id"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "keep",
+              "needs_verification",
+              "exclude",
+              "reconsider"
+            ],
+            "title": "Decision"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "good_fit",
+                  "category_match",
+                  "competitor_seller",
+                  "off_target",
+                  "audience_mismatch",
+                  "too_small",
+                  "too_expensive",
+                  "data_doubt",
+                  "not_eligible",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Note",
+            "default": ""
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "evaluation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "creator_id",
+          "decision"
+        ],
+        "title": "DecisionIn"
+      },
+      "DecisionView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "campaign_market_id": {
+            "type": "string",
+            "title": "Campaign Market Id"
+          },
+          "creator_id": {
+            "type": "string",
+            "title": "Creator Id"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "keep",
+              "needs_verification",
+              "exclude",
+              "reconsider"
+            ],
+            "title": "Decision"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "evaluation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "collaboration_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Collaboration Id",
+            "description": "该达人在本任务站点已有的合作"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "campaign_market_id",
+          "creator_id",
+          "decision",
+          "reason_code",
+          "note",
+          "run_id",
+          "evaluation_id",
+          "created_at"
+        ],
+        "title": "DecisionView"
+      },
+      "DispatchIn": {
+        "properties": {
+          "dispatched_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "string",
+                "format": "date"
+              }
+            ],
+            "title": "Dispatched At"
+          },
+          "carrier": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Carrier"
+          },
+          "tracking_number": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tracking Number"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "dispatched_at"
+        ],
+        "title": "DispatchIn",
+        "description": "人工登记“已寄出”：只记录已发生的事实，不调用任何物流接口。"
       },
       "DraftIn": {
         "properties": {
@@ -4746,6 +6502,120 @@
         ],
         "title": "Readiness"
       },
+      "RecipientIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "address_line1": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Address Line1"
+          },
+          "address_line2": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address Line2"
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "City"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "postcode": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Postcode"
+          },
+          "country_code": {
+            "type": "string",
+            "pattern": "^[A-Za-z]{2}$",
+            "title": "Country Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "address_line1",
+          "city",
+          "postcode",
+          "country_code"
+        ],
+        "title": "RecipientIn"
+      },
+      "RecipientView": {
+        "properties": {
+          "recipient": {
+            "$ref": "#/components/schemas/RecipientIn"
+          },
+          "tracking_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tracking Number"
+          }
+        },
+        "type": "object",
+        "required": [
+          "recipient",
+          "tracking_number"
+        ],
+        "title": "RecipientView"
+      },
       "RecommendationCard": {
         "properties": {
           "evaluation_id": {
@@ -5177,6 +7047,467 @@
         ],
         "title": "SettingsView"
       },
+      "ShipmentEventIn": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "in_transit",
+              "delivered",
+              "exception",
+              "returned"
+            ],
+            "title": "Status"
+          },
+          "occurred_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "string",
+                "format": "date"
+              }
+            ],
+            "title": "Occurred At"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "occurred_at"
+        ],
+        "title": "ShipmentEventIn"
+      },
+      "ShipmentEventView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "occurred_at": {
+            "type": "string",
+            "title": "Occurred At"
+          },
+          "observed_at": {
+            "type": "string",
+            "title": "Observed At"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "source",
+          "status",
+          "occurred_at",
+          "observed_at",
+          "note"
+        ],
+        "title": "ShipmentEventView"
+      },
+      "ShipmentIn": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "initial_sample",
+              "replacement",
+              "additional_sample"
+            ],
+            "title": "Kind",
+            "default": "initial_sample"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ShipmentItemIn"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Items"
+          },
+          "recipient": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecipientIn"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "创建时必填；修改时留空表示不变"
+          },
+          "cost_cap_amount": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Cap Amount",
+            "description": "本次寄样允许的样品 + 运费上限；不知道就留空"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z]{3}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency",
+            "description": "默认用任务站点的结算币种"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "ShipmentIn"
+      },
+      "ShipmentItem": {
+        "properties": {
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "variant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "unit_cost": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Cost"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sku",
+          "variant",
+          "quantity",
+          "unit_cost"
+        ],
+        "title": "ShipmentItem"
+      },
+      "ShipmentItemIn": {
+        "properties": {
+          "sku": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Sku"
+          },
+          "variant": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant"
+          },
+          "quantity": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Quantity"
+          },
+          "unit_cost": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Cost",
+            "description": "单件样品成本（寄样单币种）；不知道就留空，显示为未知"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sku",
+          "quantity"
+        ],
+        "title": "ShipmentItemIn"
+      },
+      "ShipmentView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "collaboration_id": {
+            "type": "string",
+            "title": "Collaboration Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "initial_sample",
+              "replacement",
+              "additional_sample"
+            ],
+            "title": "Kind"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "awaiting_confirmation",
+              "confirmed",
+              "dispatched",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "delivery_status": {
+            "type": "string",
+            "enum": [
+              "unknown",
+              "in_transit",
+              "delivered",
+              "exception",
+              "returned"
+            ],
+            "title": "Delivery Status",
+            "description": "签收状态：没有物流节点时是 unknown，不会自动变成已签收"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ShipmentItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "items_cost_total": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items Cost Total",
+            "description": "样品成本合计；任一明细成本未知时为空"
+          },
+          "cost_cap_amount": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Cap Amount"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "recipient_masked": {
+            "type": "string",
+            "title": "Recipient Masked",
+            "description": "脱敏后的收件摘要"
+          },
+          "recipient_country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipient Country"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          },
+          "payload_version": {
+            "type": "integer",
+            "title": "Payload Version"
+          },
+          "carrier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Carrier"
+          },
+          "tracking_masked": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tracking Masked"
+          },
+          "dispatched_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dispatched At"
+          },
+          "delivered_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivered At"
+          },
+          "action_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action Status"
+          },
+          "confirmation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConfirmationView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/ShipmentEventView"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "next_action": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "preview",
+                  "confirm",
+                  "register_dispatch",
+                  "record_delivery"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Action"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "collaboration_id",
+          "kind",
+          "status",
+          "delivery_status",
+          "items",
+          "items_cost_total",
+          "cost_cap_amount",
+          "currency",
+          "recipient_masked",
+          "recipient_country",
+          "note",
+          "payload_version",
+          "carrier",
+          "tracking_masked",
+          "dispatched_at",
+          "delivered_at",
+          "action_status",
+          "confirmation",
+          "events",
+          "next_action",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ShipmentView"
+      },
       "SnapshotView": {
         "properties": {
           "id": {
@@ -5216,6 +7547,61 @@
           "created_at"
         ],
         "title": "SnapshotView"
+      },
+      "TransitionIn": {
+        "properties": {
+          "to": {
+            "type": "string",
+            "enum": [
+              "contacting",
+              "negotiating",
+              "closed"
+            ],
+            "title": "To"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Note",
+            "default": ""
+          },
+          "closed_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "no_reply",
+                  "declined",
+                  "over_budget",
+                  "schedule_conflict",
+                  "not_suitable",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed Reason"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision",
+            "description": "看到的版本号；与当前不一致时拒绝（避免覆盖别处的修改）"
+          }
+        },
+        "type": "object",
+        "required": [
+          "to"
+        ],
+        "title": "TransitionIn"
       },
       "ValidationError": {
         "properties": {

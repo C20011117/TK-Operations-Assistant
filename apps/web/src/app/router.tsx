@@ -3,6 +3,8 @@ import { createBrowserRouter } from "react-router";
 import { CampaignDetailPage } from "@/features/campaigns/CampaignDetailPage";
 import { CampaignNewPage } from "@/features/campaigns/CampaignNewPage";
 import { CampaignsPage } from "@/features/campaigns/CampaignsPage";
+import { CollaborationDetailPage } from "@/features/collaborations/CollaborationDetailPage";
+import { CollaborationsPage } from "@/features/collaborations/CollaborationsPage";
 import { MarketsPage } from "@/features/markets/MarketsPage";
 import { ProductDetailPage } from "@/features/products/ProductDetailPage";
 import { ProductsPage } from "@/features/products/ProductsPage";
@@ -23,6 +25,8 @@ export const router = createBrowserRouter([
       { path: "campaigns", element: <CampaignsPage /> },
       { path: "campaigns/new", element: <CampaignNewPage /> },
       { path: "campaigns/:campaignId", element: <CampaignDetailPage /> },
+      { path: "collaborations", element: <CollaborationsPage /> },
+      { path: "collaborations/:collabId", element: <CollaborationDetailPage /> },
       { path: "markets", element: <MarketsPage /> },
       { path: "system", element: <SystemPage /> },
       { path: "settings", element: <SettingsPage /> },

@@ -37,3 +37,11 @@ export type SearchInput = S["SearchInput"];
 export type Competitor = S["Competitor"];
 export type CompetitorSuggestion = S["CompetitorSuggestion"];
 export type CompetitorSuggestionsView = S["CompetitorSuggestionsView"];
+
+export type DecisionView = S["DecisionView"];
+export type CollaborationSummary = S["CollaborationSummary"];
+export type CollaborationDetail = S["CollaborationDetail"];
+export type ShipmentView = S["ShipmentView"];
+export type ShipmentIn = S["ShipmentIn"];
+export type RecipientIn = S["RecipientIn"];
+export type ConfirmationPreview = S["ConfirmationPreview"];

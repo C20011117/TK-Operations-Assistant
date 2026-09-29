@@ -6,6 +6,7 @@ import { api, errorMessage, newIdempotencyKey, unwrap } from "@/lib/api/client";
 import type { CampaignDetail, CampaignMarketView, RunView } from "@/lib/api/types";
 import { callStatusLabels, fmtTime, groupLabels, runStatusLabels, stageLabels } from "@/lib/labels";
 
+import { DecisionBadge, DecisionBar } from "./DecisionBar";
 import { RecommendationCardView } from "./RecommendationCardView";
 
 const ACTIVE = ["queued", "running"];
@@ -125,6 +126,17 @@ function Recommendations({ run }: { run: RunView }) {
     queryFn: () => unwrap(api.GET("/api/v1/matching-runs/{run_id}/recommendations", { params: { path: { run_id: run.id } } })),
     enabled: done,
   });
+  const decisions = useQuery({
+    queryKey: ["decisions", run.campaign_market_id],
+    queryFn: () =>
+      unwrap(
+        api.GET("/api/v1/campaign-markets/{cm_id}/creator-decisions", {
+          params: { path: { cm_id: run.campaign_market_id } },
+        }),
+      ),
+    enabled: done,
+  });
+  const byCreator = new Map((decisions.data ?? []).map((d) => [d.creator_id, d]));
   if (!done) return null;
   if (q.isError) return <ErrorText>{errorMessage(q.error)}</ErrorText>;
   if (!q.data) return <p className="text-sm text-slate-500">加载推荐…</p>;
@@ -158,7 +170,14 @@ function Recommendations({ run }: { run: RunView }) {
       ) : (
         <div className="space-y-2">
           {cards.map((c) => (
-            <RecommendationCardView key={c.evaluation_id} card={c} />
+            <RecommendationCardView
+              key={c.evaluation_id}
+              card={c}
+              badge={<DecisionBadge d={byCreator.get(c.creator.id)} />}
+              actions={
+                <DecisionBar cmId={run.campaign_market_id} runId={run.id} card={c} decision={byCreator.get(c.creator.id)} />
+              }
+            />
           ))}
         </div>
       )}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import { Badge } from "@/components/ui";
 import type { CardNote, CardPoint, RecommendationCard } from "@/lib/api/types";
@@ -67,7 +67,15 @@ function Notes({ title, className, items }: { title: string; className: string; 
 }
 
 /** 推荐卡：同时显示匹配点、不匹配点、未知项、异常项、待确认问题。 */
-export function RecommendationCardView({ card }: { card: RecommendationCard }) {
+export function RecommendationCardView({
+  card,
+  badge,
+  actions,
+}: {
+  card: RecommendationCard;
+  badge?: ReactNode;
+  actions?: ReactNode;
+}) {
   const [open, setOpen] = useState(card.group !== "excluded");
   const c = card.creator;
   const fit = card.ai.product_fit;
@@ -82,6 +90,7 @@ export function RecommendationCardView({ card }: { card: RecommendationCard }) {
         </span>
         {card.matches.some((p) => p.tag === "竞品") && <Badge tone="blue">卖过竞品</Badge>}
         {card.matches.some((p) => p.tag === "类目") && <Badge tone="green">带过同类目</Badge>}
+        {badge}
         {fit && <Badge tone={fit === "high" ? "green" : fit === "low" ? "red" : "slate"}>{fitLabels[fit]}</Badge>}
         {card.ai.status === "failed" && <Badge tone="amber">AI 判断失败</Badge>}
         {card.anomalies.length > 0 && <Badge tone="amber">数据异常 {card.anomalies.length}</Badge>}
@@ -120,6 +129,7 @@ export function RecommendationCardView({ card }: { card: RecommendationCard }) {
             {card.categories && <span>{card.categories}</span>}
             {card.profile_text && <span className="truncate">简介：{card.profile_text}</span>}
           </div>
+          {actions}
         </div>
       )}
     </div>
