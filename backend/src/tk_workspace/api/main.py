@@ -1,33 +1,38 @@
-"""FastAPI 入口。路由统一挂在 /api/v1 下；错误响应统一为 {"error": {"code", "message"}}。"""
+"""FastAPI 应用工厂。路由统一挂在 /api/v1 下；错误响应统一为 {"error": {"code", "message"}}。"""
 
 import logging
 import uuid
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from tk_workspace.api import system
-from tk_workspace.api.deps import current_session
-from tk_workspace.config import get_settings
+from tk_workspace.api.security import LocalAuthMiddleware
+from tk_workspace.config import APP_VERSION, Settings, get_settings
 from tk_workspace.modules.campaigns import markets
-from tk_workspace.modules.identity import router as identity_router
+from tk_workspace.modules.settings import router as settings_router
 
 log = logging.getLogger("tk_workspace")
+DEV_TOKEN = "dev-token"  # noqa: S105 — 仅开发模式（未由外壳提供令牌时）使用，生产启动会拒绝
 
 
-def create_app() -> FastAPI:
-    settings = get_settings()
-    missing = settings.missing_required()
-    if missing:
-        # 只报告缺失的变量名，不输出任何值
-        log.warning("missing required settings: %s", ", ".join(missing))
+def resolve_token(settings: Settings) -> str:
+    if settings.launch_token:
+        return settings.launch_token
+    if settings.app_env == "production":
+        raise RuntimeError("TKWS_LAUNCH_TOKEN is required in production")
+    return DEV_TOKEN
 
+
+def create_app(settings: Settings | None = None, token: str | None = None) -> FastAPI:
+    s = settings or get_settings()
     app = FastAPI(
-        title="TK 多站点达人工作台 API",
-        version="0.1.0",
-        openapi_url="/api/v1/openapi.json",
-        docs_url="/api/v1/docs" if settings.is_dev_like else None,
+        title="TK 达人工作台（桌面版）本机接口",
+        version=APP_VERSION,
+        openapi_url="/api/v1/openapi.json" if s.app_env != "production" else None,
+        docs_url=None,
         redoc_url=None,
     )
 
@@ -54,11 +59,20 @@ def create_app() -> FastAPI:
         )
 
     api = "/api/v1"
-    app.include_router(system.health_router, prefix=api)
-    app.include_router(identity_router.router, prefix=api)
-    app.include_router(markets.router, prefix=api, dependencies=[Depends(current_session)])
-    app.include_router(system.tenant_router, prefix=api)
+    app.include_router(system.router, prefix=api)
+    app.include_router(markets.router, prefix=api)
+    app.include_router(settings_router.router, prefix=api)
+
+    # 中间件后加的在外层：CORS 在最外层处理预检，其次是令牌校验
+    app.add_middleware(LocalAuthMiddleware, token=token or resolve_token(s))
+    origins = list(s.allowed_origins)
+    if s.app_env != "production":
+        origins += ["http://localhost:5173", "http://127.0.0.1:5173"]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_methods=["GET", "POST", "PUT", "DELETE"],
+        allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "X-Request-ID"],
+        expose_headers=["Idempotent-Replayed", "X-Request-ID"],
+    )
     return app
-
-
-app = create_app()

@@ -1,17 +1,17 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "TK 多站点达人工作台 API",
-    "version": "0.1.0"
+    "title": "TK 达人工作台（桌面版）本机接口",
+    "version": "0.2.0"
   },
   "paths": {
-    "/api/v1/health": {
+    "/api/v1/system/health": {
       "get": {
         "tags": [
           "system"
         ],
-        "summary": "进程存活",
-        "operationId": "live_api_v1_health_get",
+        "summary": "健康检查（数据库）",
+        "operationId": "health_api_v1_system_health_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -26,20 +26,20 @@
         }
       }
     },
-    "/api/v1/health/ready": {
+    "/api/v1/system/info": {
       "get": {
         "tags": [
           "system"
         ],
-        "summary": "依赖就绪（数据库、Redis）",
-        "operationId": "ready_api_v1_health_ready_get",
+        "summary": "版本与数据目录",
+        "operationId": "info_api_v1_system_info_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Health"
+                  "$ref": "#/components/schemas/AppInfo"
                 }
               }
             }
@@ -47,208 +47,23 @@
         }
       }
     },
-    "/api/v1/auth/login": {
+    "/api/v1/system/jobs": {
       "post": {
         "tags": [
-          "auth"
+          "system"
         ],
-        "summary": "邮箱密码登录",
-        "operationId": "login_api_v1_auth_login_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Me"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/auth/logout": {
-      "post": {
-        "tags": [
-          "auth"
-        ],
-        "summary": "退出登录",
-        "operationId": "logout_api_v1_auth_logout_post",
+        "summary": "创建测试任务（幂等）",
+        "operationId": "create_job_api_v1_system_jobs_post",
         "parameters": [
           {
-            "name": "X-CSRF-Token",
+            "name": "Idempotency-Key",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Csrf-Token"
-            }
-          },
-          {
-            "name": "tkws_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tkws Session"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/auth/me": {
-      "get": {
-        "tags": [
-          "auth"
-        ],
-        "summary": "当前用户与企业",
-        "operationId": "me_api_v1_auth_me_get",
-        "parameters": [
-          {
-            "name": "X-CSRF-Token",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Csrf-Token"
-            }
-          },
-          {
-            "name": "tkws_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tkws Session"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Me"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/auth/switch-tenant": {
-      "post": {
-        "tags": [
-          "auth"
-        ],
-        "summary": "切换当前企业",
-        "operationId": "switch_tenant_api_v1_auth_switch_tenant_post",
-        "parameters": [
-          {
-            "name": "X-CSRF-Token",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Csrf-Token"
-            }
-          },
-          {
-            "name": "tkws_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tkws Session"
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200,
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -257,18 +72,125 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SwitchTenantRequest"
+                "$ref": "#/components/schemas/CreateJobRequest"
               }
             }
           }
         },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "最近的任务",
+        "operationId": "list_jobs_api_v1_system_jobs_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Me"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JobView"
+                  },
+                  "title": "Response List Jobs Api V1 System Jobs Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/system/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "任务状态",
+        "operationId": "get_job_api_v1_system_jobs__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/system/jobs/{job_id}/cancel": {
+      "post": {
+        "tags": [
+          "system"
+        ],
+        "summary": "取消任务",
+        "operationId": "cancel_job_api_v1_system_jobs__job_id__cancel_post",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobView"
                 }
               }
             }
@@ -309,38 +231,6 @@
               ],
               "default": "europe",
               "title": "Region Group"
-            }
-          },
-          {
-            "name": "X-CSRF-Token",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Csrf-Token"
-            }
-          },
-          {
-            "name": "tkws_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tkws Session"
             }
           }
         ],
@@ -388,38 +278,6 @@
               "type": "string",
               "title": "Market Code"
             }
-          },
-          {
-            "name": "X-CSRF-Token",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Csrf-Token"
-            }
-          },
-          {
-            "name": "tkws_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tkws Session"
-            }
           }
         ],
         "responses": {
@@ -446,162 +304,51 @@
         }
       }
     },
-    "/api/v1/tenants/{tenant_id}/system/jobs": {
-      "post": {
+    "/api/v1/settings": {
+      "get": {
         "tags": [
-          "system"
+          "settings"
         ],
-        "summary": "创建测试任务（幂等）",
-        "operationId": "create_job_api_v1_tenants__tenant_id__system_jobs_post",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 8,
-              "maxLength": 200,
-              "title": "Idempotency-Key"
-            }
-          },
-          {
-            "name": "X-CSRF-Token",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
+        "summary": "当前设置（不含密钥明文）",
+        "operationId": "get_settings_view_api_v1_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsView"
                 }
-              ],
-              "title": "X-Csrf-Token"
-            }
-          },
-          {
-            "name": "tkws_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tkws Session"
+              }
             }
           }
+        }
+      }
+    },
+    "/api/v1/settings/llm": {
+      "put": {
+        "tags": [
+          "settings"
         ],
+        "summary": "保存大模型设置",
+        "operationId": "put_llm_api_v1_settings_llm_put",
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateJobRequest"
+                "$ref": "#/components/schemas/LLMSettingsUpdate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
-          "202": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JobView"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "system"
-        ],
-        "summary": "我的任务",
-        "operationId": "list_jobs_api_v1_tenants__tenant_id__system_jobs_get",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "X-CSRF-Token",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Csrf-Token"
-            }
-          },
-          {
-            "name": "tkws_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tkws Session"
-            }
-          }
-        ],
-        "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/JobView"
-                  },
-                  "title": "Response List Jobs Api V1 Tenants  Tenant Id  System Jobs Get"
+                  "$ref": "#/components/schemas/SettingsView"
                 }
               }
             }
@@ -619,74 +366,30 @@
         }
       }
     },
-    "/api/v1/tenants/{tenant_id}/system/jobs/{job_id}": {
-      "get": {
+    "/api/v1/settings/fastmoss": {
+      "put": {
         "tags": [
-          "system"
+          "settings"
         ],
-        "summary": "任务状态",
-        "operationId": "get_job_api_v1_tenants__tenant_id__system_jobs__job_id__get",
-        "parameters": [
-          {
-            "name": "job_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Job Id"
+        "summary": "保存 FastMoss API Key（空字符串表示删除）",
+        "operationId": "put_fastmoss_api_v1_settings_fastmoss_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FastMossSettingsUpdate"
+              }
             }
           },
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "X-CSRF-Token",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Csrf-Token"
-            }
-          },
-          {
-            "name": "tkws_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tkws Session"
-            }
-          }
-        ],
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/JobView"
+                  "$ref": "#/components/schemas/SettingsView"
                 }
               }
             }
@@ -704,57 +407,13 @@
         }
       }
     },
-    "/api/v1/tenants/{tenant_id}/system/checks": {
+    "/api/v1/settings/checks": {
       "post": {
         "tags": [
-          "system"
+          "settings"
         ],
-        "summary": "外部服务连通检查（仅管理员）",
-        "operationId": "external_checks_api_v1_tenants__tenant_id__system_checks_post",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "X-CSRF-Token",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Csrf-Token"
-            }
-          },
-          {
-            "name": "tkws_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tkws Session"
-            }
-          }
-        ],
+        "summary": "外部服务连通检查",
+        "operationId": "external_checks_api_v1_settings_checks_post",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -765,16 +424,6 @@
                 }
               }
             }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
           }
         }
       }
@@ -782,6 +431,24 @@
   },
   "components": {
     "schemas": {
+      "AppInfo": {
+        "properties": {
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "data_dir": {
+            "type": "string",
+            "title": "Data Dir"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "data_dir"
+        ],
+        "title": "AppInfo"
+      },
       "CreateJobRequest": {
         "properties": {
           "kind": {
@@ -882,6 +549,45 @@
         ],
         "title": "ExternalChecks"
       },
+      "FastMossSettingsUpdate": {
+        "properties": {
+          "api_key": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Api Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "api_key"
+        ],
+        "title": "FastMossSettingsUpdate"
+      },
+      "FastMossSettingsView": {
+        "properties": {
+          "api_key_hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key Hint"
+          },
+          "configured": {
+            "type": "boolean",
+            "title": "Configured"
+          }
+        },
+        "type": "object",
+        "required": [
+          "api_key_hint",
+          "configured"
+        ],
+        "title": "FastMossSettingsView"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -905,6 +611,10 @@
             ],
             "title": "Status"
           },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
           "checks": {
             "additionalProperties": {
               "type": "string"
@@ -916,6 +626,7 @@
         "type": "object",
         "required": [
           "status",
+          "version",
           "checks"
         ],
         "title": "Health"
@@ -924,7 +635,6 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid",
             "title": "Id"
           },
           "kind": {
@@ -992,21 +702,33 @@
             ],
             "title": "Last Error"
           },
+          "attempt": {
+            "type": "integer",
+            "title": "Attempt"
+          },
           "created_at": {
             "type": "string",
-            "format": "date-time",
             "title": "Created At"
           },
           "updated_at": {
             "type": "string",
-            "format": "date-time",
             "title": "Updated At"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
           },
           "finished_at": {
             "anyOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -1024,34 +746,132 @@
           "progress",
           "result",
           "last_error",
+          "attempt",
           "created_at",
           "updated_at",
+          "started_at",
           "finished_at"
         ],
         "title": "JobView"
       },
-      "LoginRequest": {
+      "LLMSettingsUpdate": {
         "properties": {
-          "email": {
+          "base_url": {
             "type": "string",
-            "maxLength": 254,
-            "minLength": 3,
-            "pattern": "^[^@\\s]+@[^@\\s]+$",
-            "title": "Email"
+            "maxLength": 500,
+            "title": "Base Url",
+            "default": ""
           },
-          "password": {
+          "model_matching": {
             "type": "string",
-            "maxLength": 256,
-            "minLength": 1,
-            "title": "Password"
+            "maxLength": 200,
+            "title": "Model Matching",
+            "default": ""
+          },
+          "model_brief": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Model Brief",
+            "default": ""
+          },
+          "structured_mode": {
+            "type": "string",
+            "enum": [
+              "json_schema",
+              "function_calling",
+              "json_mode"
+            ],
+            "title": "Structured Mode",
+            "default": "json_schema"
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "maximum": 600.0,
+            "minimum": 5.0,
+            "title": "Timeout Seconds",
+            "default": 60
+          },
+          "data_region": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Data Region",
+            "default": ""
+          },
+          "api_key": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key"
+          }
+        },
+        "type": "object",
+        "title": "LLMSettingsUpdate"
+      },
+      "LLMSettingsView": {
+        "properties": {
+          "base_url": {
+            "type": "string",
+            "title": "Base Url"
+          },
+          "model_matching": {
+            "type": "string",
+            "title": "Model Matching"
+          },
+          "model_brief": {
+            "type": "string",
+            "title": "Model Brief"
+          },
+          "structured_mode": {
+            "type": "string",
+            "enum": [
+              "json_schema",
+              "function_calling",
+              "json_mode"
+            ],
+            "title": "Structured Mode"
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "title": "Timeout Seconds"
+          },
+          "data_region": {
+            "type": "string",
+            "title": "Data Region"
+          },
+          "api_key_hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key Hint"
+          },
+          "configured": {
+            "type": "boolean",
+            "title": "Configured"
           }
         },
         "type": "object",
         "required": [
-          "email",
-          "password"
+          "base_url",
+          "model_matching",
+          "model_brief",
+          "structured_mode",
+          "timeout_seconds",
+          "data_region",
+          "api_key_hint",
+          "configured"
         ],
-        "title": "LoginRequest"
+        "title": "LLMSettingsView"
       },
       "Market": {
         "properties": {
@@ -1151,97 +971,21 @@
         ],
         "title": "Market"
       },
-      "Me": {
+      "SettingsView": {
         "properties": {
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
+          "llm": {
+            "$ref": "#/components/schemas/LLMSettingsView"
           },
-          "display_name": {
-            "type": "string",
-            "title": "Display Name"
-          },
-          "email": {
-            "type": "string",
-            "title": "Email"
-          },
-          "current": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TenantMembership"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "memberships": {
-            "items": {
-              "$ref": "#/components/schemas/TenantMembership"
-            },
-            "type": "array",
-            "title": "Memberships"
+          "fastmoss": {
+            "$ref": "#/components/schemas/FastMossSettingsView"
           }
         },
         "type": "object",
         "required": [
-          "user_id",
-          "display_name",
-          "email",
-          "current",
-          "memberships"
+          "llm",
+          "fastmoss"
         ],
-        "title": "Me"
-      },
-      "SwitchTenantRequest": {
-        "properties": {
-          "tenant_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Tenant Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "tenant_id"
-        ],
-        "title": "SwitchTenantRequest"
-      },
-      "TenantMembership": {
-        "properties": {
-          "tenant_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Tenant Id"
-          },
-          "tenant_name": {
-            "type": "string",
-            "title": "Tenant Name"
-          },
-          "principal_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Principal Id"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "admin",
-              "bd",
-              "viewer"
-            ],
-            "title": "Role"
-          }
-        },
-        "type": "object",
-        "required": [
-          "tenant_id",
-          "tenant_name",
-          "principal_id",
-          "role"
-        ],
-        "title": "TenantMembership"
+        "title": "SettingsView"
       },
       "ValidationError": {
         "properties": {

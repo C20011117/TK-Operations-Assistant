@@ -1,33 +1,22 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { NavLink, Navigate, Outlet, useNavigate } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import { NavLink, Outlet } from "react-router";
 
-import { Badge, Button } from "@/components/ui";
-import { useMe } from "@/features/auth/useMe";
 import { api } from "@/lib/api/client";
-
-const roleLabel: Record<string, string> = { admin: "管理员", bd: "BD", viewer: "只读" };
 
 const nav = [
   { to: "/", label: "我的工作台", end: true },
   { to: "/markets", label: "站点目录", end: false },
   { to: "/system", label: "系统状态", end: false },
+  { to: "/settings", label: "设置", end: false },
 ];
 
 export function AppLayout() {
-  const me = useMe();
-  const qc = useQueryClient();
-  const navigate = useNavigate();
+  const info = useQuery({
+    queryKey: ["system", "info"],
+    queryFn: async () => (await api.GET("/api/v1/system/info")).data ?? null,
+    staleTime: Infinity,
+  });
 
-  if (me.isPending) return <div className="p-8 text-sm text-slate-500">加载中…</div>;
-  if (!me.data) return <Navigate to="/login" replace />;
-
-  const logout = async () => {
-    await api.POST("/api/v1/auth/logout");
-    qc.clear();
-    navigate("/login", { replace: true });
-  };
-
-  const current = me.data.current;
   return (
     <div className="min-h-screen">
       <header className="border-b border-slate-200 bg-white">
@@ -49,23 +38,11 @@ export function AppLayout() {
               ))}
             </nav>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            {current ? (
-              <span className="text-slate-600">
-                {current.tenant_name} · {me.data.display_name}{" "}
-                <Badge tone="blue">{roleLabel[current.role] ?? current.role}</Badge>
-              </span>
-            ) : (
-              <Badge tone="amber">未选择企业</Badge>
-            )}
-            <Button variant="ghost" onClick={logout}>
-              退出
-            </Button>
-          </div>
+          <span className="text-xs text-slate-400">{info.data ? `v${info.data.version}` : ""}</span>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-6 py-8">
-        {current ? <Outlet context={{ me: me.data }} /> : <p className="text-sm text-slate-600">你的账号还没有加入任何企业。</p>}
+        <Outlet />
       </main>
     </div>
   );

@@ -1,29 +1,23 @@
 import createClient, { type Middleware } from "openapi-fetch";
 
+import { getBackend } from "./backend";
 import type { paths } from "./schema";
 
-const CSRF_COOKIE = "tkws_csrf";
-
-function readCookie(name: string): string | undefined {
-  return document.cookie
-    .split("; ")
-    .find((c) => c.startsWith(`${name}=`))
-    ?.slice(name.length + 1);
-}
-
-/** 非 GET 请求自动带上 CSRF 令牌（双重提交）。 */
-const csrf: Middleware = {
-  onRequest({ request }) {
-    if (!["GET", "HEAD", "OPTIONS"].includes(request.method)) {
-      const token = readCookie(CSRF_COOKIE);
-      if (token) request.headers.set("X-CSRF-Token", decodeURIComponent(token));
-    }
-    return request;
+/** 每个请求加上后端地址与本次启动的访问令牌。 */
+const backend: Middleware = {
+  async onRequest({ request }) {
+    const { baseUrl, token } = await getBackend();
+    const url = new URL(request.url);
+    const target = baseUrl ? `${baseUrl}${url.pathname}${url.search}` : request.url;
+    const next = new Request(target, request);
+    next.headers.set("Authorization", `Bearer ${token}`);
+    return next;
   },
 };
 
-export const api = createClient<paths>({ baseUrl: "", credentials: "same-origin" });
-api.use(csrf);
+// baseUrl 只是占位，真实地址由中间件替换
+export const api = createClient<paths>({ baseUrl: window.location.origin });
+api.use(backend);
 
 export type ApiError = { error?: { code?: string; message?: string } };
 

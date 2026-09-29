@@ -6,48 +6,21 @@ on:
 
 jobs:
   backend:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: pgvector/pgvector:pg18
-        env:
-          POSTGRES_PASSWORD: ci-superuser
-        ports: ["5432:5432"]
-        options: >-
-          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 20
-      redis:
-        image: redis:8-alpine
-        ports: ["6379:6379"]
-    env:
-      APP_ENV: test
-      DB_HOST: localhost
-      DB_PORT: "5432"
-      DB_NAME: tk_workspace
-      POSTGRES_SUPERUSER_PASSWORD: ci-superuser
-      APP_OWNER_PASSWORD: ci-owner
-      APP_RUNTIME_PASSWORD: ci-runtime
-      APP_DISPATCHER_PASSWORD: ci-dispatcher
-      REDIS_URL: redis://localhost:6379/0
+    # 目标平台只有 Windows，后端测试也在 Windows 上跑（凭据管理器、父进程看护等行为与 Linux 不同）
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-      - name: 创建数据库角色
-        env:
-          PGHOST: localhost
-          PGPASSWORD: ci-superuser
-          POSTGRES_USER: postgres
-        run: bash infra/compose/postgres/init/01-roles.sh
-      - name: 安装依赖
-        working-directory: backend
-        run: uv sync --frozen
+      - run: uv sync --frozen
       - name: Lint
-        working-directory: backend
         run: uv run ruff check . && uv run ruff format --check .
-      - name: 测试（含 RLS 与任务链路集成测试）
-        working-directory: backend
+      - name: 测试
         run: uv run pytest -q
       - name: OpenAPI 与前端类型一致
-        working-directory: backend
+        shell: bash
         run: |
           uv run python -m tk_workspace.api.export_openapi ../apps/web/openapi.json
           git diff --exit-code ../apps/web/openapi.json
@@ -74,3 +47,29 @@ jobs:
           git diff --exit-code src/lib/api/schema.d.ts
       - run: pnpm typecheck
       - run: pnpm build
+
+  desktop:
+    # 打出 Windows 安装包并作为构建产物上传
+    needs: [backend, web]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri
+      - name: 构建安装包
+        shell: pwsh
+        run: ./scripts/build-desktop.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: apps/desktop/src-tauri/target/release/bundle/nsis/*.exe
+          if-no-files-found: error

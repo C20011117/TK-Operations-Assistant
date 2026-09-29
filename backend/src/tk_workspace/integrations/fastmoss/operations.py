@@ -37,8 +37,9 @@ OPERATIONS: dict[str, ProviderOperation] = {
 
 
 def client_from_settings() -> FastMossMCPClient:
-    s = get_settings()
-    return FastMossMCPClient(s.fastmoss_mcp_url, s.fastmoss_mcp_api_key.get_secret_value())
+    from tk_workspace.modules.settings.service import get_fastmoss_key
+
+    return FastMossMCPClient(get_settings().fastmoss_mcp_url, get_fastmoss_key())
 
 
 def execute(

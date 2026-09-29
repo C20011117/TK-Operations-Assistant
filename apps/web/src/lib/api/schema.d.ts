@@ -4,15 +4,15 @@
  */
 
 export interface paths {
-    "/api/v1/health": {
+    "/api/v1/system/health": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** 进程存活 */
-        get: operations["live_api_v1_health_get"];
+        /** 健康检查（数据库） */
+        get: operations["health_api_v1_system_health_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -21,15 +21,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/health/ready": {
+    "/api/v1/system/info": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** 依赖就绪（数据库、Redis） */
-        get: operations["ready_api_v1_health_ready_get"];
+        /** 版本与数据目录 */
+        get: operations["info_api_v1_system_info_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -38,49 +38,33 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/login": {
+    "/api/v1/system/jobs": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** 最近的任务 */
+        get: operations["list_jobs_api_v1_system_jobs_get"];
         put?: never;
-        /** 邮箱密码登录 */
-        post: operations["login_api_v1_auth_login_post"];
+        /** 创建测试任务（幂等） */
+        post: operations["create_job_api_v1_system_jobs_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/logout": {
+    "/api/v1/system/jobs/{job_id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
-        /** 退出登录 */
-        post: operations["logout_api_v1_auth_logout_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 当前用户与企业 */
-        get: operations["me_api_v1_auth_me_get"];
+        /** 任务状态 */
+        get: operations["get_job_api_v1_system_jobs__job_id__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -89,7 +73,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/switch-tenant": {
+    "/api/v1/system/jobs/{job_id}/cancel": {
         parameters: {
             query?: never;
             header?: never;
@@ -98,8 +82,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** 切换当前企业 */
-        post: operations["switch_tenant_api_v1_auth_switch_tenant_post"];
+        /** 取消任务 */
+        post: operations["cancel_job_api_v1_system_jobs__job_id__cancel_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -140,33 +124,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/tenants/{tenant_id}/system/jobs": {
+    "/api/v1/settings": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** 我的任务 */
-        get: operations["list_jobs_api_v1_tenants__tenant_id__system_jobs_get"];
-        put?: never;
-        /** 创建测试任务（幂等） */
-        post: operations["create_job_api_v1_tenants__tenant_id__system_jobs_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/tenants/{tenant_id}/system/jobs/{job_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 任务状态 */
-        get: operations["get_job_api_v1_tenants__tenant_id__system_jobs__job_id__get"];
+        /** 当前设置（不含密钥明文） */
+        get: operations["get_settings_view_api_v1_settings_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -175,7 +141,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/tenants/{tenant_id}/system/checks": {
+    "/api/v1/settings/llm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 保存大模型设置 */
+        put: operations["put_llm_api_v1_settings_llm_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings/fastmoss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 保存 FastMoss API Key（空字符串表示删除） */
+        put: operations["put_fastmoss_api_v1_settings_fastmoss_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings/checks": {
         parameters: {
             query?: never;
             header?: never;
@@ -184,8 +184,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** 外部服务连通检查（仅管理员） */
-        post: operations["external_checks_api_v1_tenants__tenant_id__system_checks_post"];
+        /** 外部服务连通检查 */
+        post: operations["external_checks_api_v1_settings_checks_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -196,6 +196,13 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AppInfo */
+        AppInfo: {
+            /** Version */
+            version: string;
+            /** Data Dir */
+            data_dir: string;
+        };
         /** CreateJobRequest */
         CreateJobRequest: {
             /**
@@ -235,6 +242,18 @@ export interface components {
             llm: components["schemas"]["ExternalCheck"];
             fastmoss: components["schemas"]["ExternalCheck"];
         };
+        /** FastMossSettingsUpdate */
+        FastMossSettingsUpdate: {
+            /** Api Key */
+            api_key: string;
+        };
+        /** FastMossSettingsView */
+        FastMossSettingsView: {
+            /** Api Key Hint */
+            api_key_hint: string | null;
+            /** Configured */
+            configured: boolean;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -247,6 +266,8 @@ export interface components {
              * @enum {string}
              */
             status: "ok" | "degraded";
+            /** Version */
+            version: string;
             /** Checks */
             checks: {
                 [key: string]: string;
@@ -254,10 +275,7 @@ export interface components {
         };
         /** JobView */
         JobView: {
-            /**
-             * Id
-             * Format: uuid
-             */
+            /** Id */
             id: string;
             /** Kind */
             kind: string;
@@ -280,25 +298,74 @@ export interface components {
             last_error: {
                 [key: string]: unknown;
             } | null;
-            /**
-             * Created At
-             * Format: date-time
-             */
+            /** Attempt */
+            attempt: number;
+            /** Created At */
             created_at: string;
-            /**
-             * Updated At
-             * Format: date-time
-             */
+            /** Updated At */
             updated_at: string;
+            /** Started At */
+            started_at: string | null;
             /** Finished At */
             finished_at: string | null;
         };
-        /** LoginRequest */
-        LoginRequest: {
-            /** Email */
-            email: string;
-            /** Password */
-            password: string;
+        /** LLMSettingsUpdate */
+        LLMSettingsUpdate: {
+            /**
+             * Base Url
+             * @default
+             */
+            base_url: string;
+            /**
+             * Model Matching
+             * @default
+             */
+            model_matching: string;
+            /**
+             * Model Brief
+             * @default
+             */
+            model_brief: string;
+            /**
+             * Structured Mode
+             * @default json_schema
+             * @enum {string}
+             */
+            structured_mode: "json_schema" | "function_calling" | "json_mode";
+            /**
+             * Timeout Seconds
+             * @default 60
+             */
+            timeout_seconds: number;
+            /**
+             * Data Region
+             * @default
+             */
+            data_region: string;
+            /** Api Key */
+            api_key?: string | null;
+        };
+        /** LLMSettingsView */
+        LLMSettingsView: {
+            /** Base Url */
+            base_url: string;
+            /** Model Matching */
+            model_matching: string;
+            /** Model Brief */
+            model_brief: string;
+            /**
+             * Structured Mode
+             * @enum {string}
+             */
+            structured_mode: "json_schema" | "function_calling" | "json_mode";
+            /** Timeout Seconds */
+            timeout_seconds: number;
+            /** Data Region */
+            data_region: string;
+            /** Api Key Hint */
+            api_key_hint: string | null;
+            /** Configured */
+            configured: boolean;
         };
         /** Market */
         Market: {
@@ -330,48 +397,10 @@ export interface components {
             /** Notes */
             notes: string;
         };
-        /** Me */
-        Me: {
-            /**
-             * User Id
-             * Format: uuid
-             */
-            user_id: string;
-            /** Display Name */
-            display_name: string;
-            /** Email */
-            email: string;
-            current: components["schemas"]["TenantMembership"] | null;
-            /** Memberships */
-            memberships: components["schemas"]["TenantMembership"][];
-        };
-        /** SwitchTenantRequest */
-        SwitchTenantRequest: {
-            /**
-             * Tenant Id
-             * Format: uuid
-             */
-            tenant_id: string;
-        };
-        /** TenantMembership */
-        TenantMembership: {
-            /**
-             * Tenant Id
-             * Format: uuid
-             */
-            tenant_id: string;
-            /** Tenant Name */
-            tenant_name: string;
-            /**
-             * Principal Id
-             * Format: uuid
-             */
-            principal_id: string;
-            /**
-             * Role
-             * @enum {string}
-             */
-            role: "admin" | "bd" | "viewer";
+        /** SettingsView */
+        SettingsView: {
+            llm: components["schemas"]["LLMSettingsView"];
+            fastmoss: components["schemas"]["FastMossSettingsView"];
         };
         /** ValidationError */
         ValidationError: {
@@ -395,7 +424,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    live_api_v1_health_get: {
+    health_api_v1_system_health_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -415,7 +444,7 @@ export interface operations {
             };
         };
     };
-    ready_api_v1_health_ready_get: {
+    info_api_v1_system_info_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -430,227 +459,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Health"];
+                    "application/json": components["schemas"]["AppInfo"];
                 };
             };
         };
     };
-    login_api_v1_auth_login_post: {
+    list_jobs_api_v1_system_jobs_get: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LoginRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Me"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    logout_api_v1_auth_logout_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-CSRF-Token"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                tkws_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    me_api_v1_auth_me_get: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-CSRF-Token"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                tkws_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Me"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    switch_tenant_api_v1_auth_switch_tenant_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-CSRF-Token"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                tkws_session?: string | null;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SwitchTenantRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Me"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    markets_index_api_v1_markets_get: {
-        parameters: {
-            query?: {
-                region_group?: string | null;
-            };
-            header?: {
-                "X-CSRF-Token"?: string | null;
-            };
-            path?: never;
-            cookie?: {
-                tkws_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Market"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    market_detail_api_v1_markets__market_code__get: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-CSRF-Token"?: string | null;
-            };
-            path: {
-                market_code: string;
-            };
-            cookie?: {
-                tkws_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Market"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_jobs_api_v1_tenants__tenant_id__system_jobs_get: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-CSRF-Token"?: string | null;
-            };
-            path: {
-                tenant_id: string;
-            };
-            cookie?: {
-                tkws_session?: string | null;
-            };
         };
         requestBody?: never;
         responses: {
@@ -663,30 +482,16 @@ export interface operations {
                     "application/json": components["schemas"]["JobView"][];
                 };
             };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
         };
     };
-    create_job_api_v1_tenants__tenant_id__system_jobs_post: {
+    create_job_api_v1_system_jobs_post: {
         parameters: {
             query?: never;
             header: {
                 "Idempotency-Key": string;
-                "X-CSRF-Token"?: string | null;
             };
-            path: {
-                tenant_id: string;
-            };
-            cookie?: {
-                tkws_session?: string | null;
-            };
+            path?: never;
+            cookie?: never;
         };
         requestBody: {
             content: {
@@ -714,19 +519,14 @@ export interface operations {
             };
         };
     };
-    get_job_api_v1_tenants__tenant_id__system_jobs__job_id__get: {
+    get_job_api_v1_system_jobs__job_id__get: {
         parameters: {
             query?: never;
-            header?: {
-                "X-CSRF-Token"?: string | null;
-            };
+            header?: never;
             path: {
                 job_id: string;
-                tenant_id: string;
             };
-            cookie?: {
-                tkws_session?: string | null;
-            };
+            cookie?: never;
         };
         requestBody?: never;
         responses: {
@@ -750,18 +550,191 @@ export interface operations {
             };
         };
     };
-    external_checks_api_v1_tenants__tenant_id__system_checks_post: {
+    cancel_job_api_v1_system_jobs__job_id__cancel_post: {
         parameters: {
             query?: never;
-            header?: {
-                "X-CSRF-Token"?: string | null;
-            };
+            header?: never;
             path: {
-                tenant_id: string;
+                job_id: string;
             };
-            cookie?: {
-                tkws_session?: string | null;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobView"];
+                };
             };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    markets_index_api_v1_markets_get: {
+        parameters: {
+            query?: {
+                region_group?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Market"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    market_detail_api_v1_markets__market_code__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                market_code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Market"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_settings_view_api_v1_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsView"];
+                };
+            };
+        };
+    };
+    put_llm_api_v1_settings_llm_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LLMSettingsUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_fastmoss_api_v1_settings_fastmoss_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FastMossSettingsUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    external_checks_api_v1_settings_checks_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
         requestBody?: never;
         responses: {
@@ -772,15 +745,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExternalChecks"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

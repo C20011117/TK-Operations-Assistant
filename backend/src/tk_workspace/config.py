@@ -1,92 +1,75 @@
-"""部署配置。只从环境变量 / .env 读取；启动时校验必需项，日志只报告缺失的变量名。"""
+"""运行配置（桌面版）。
 
+桌面应用没有 .env：数据目录、启动令牌等由外壳通过环境变量传入；
+FastMoss / 大模型的密钥保存在 Windows 凭据管理器，非密钥配置保存在数据库 app_settings 表。
+这里只放“进程启动时就要确定”的配置。
+"""
+
+import os
+import sys
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
-from urllib.parse import quote
 
-from pydantic import Field, SecretStr
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-_REPO_ROOT = Path(__file__).resolve().parents[3]
+APP_NAME = "TKWorkspace"
+APP_VERSION = "0.2.0"
+KEYRING_SERVICE = "TKWorkspace"
+
+
+def default_data_dir() -> Path:
+    base = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
+    return Path(base) / APP_NAME
+
+
+def bundle_root() -> Path:
+    """打包后为 PyInstaller 解包目录；源码运行时为 backend/ 目录。"""
+    if getattr(sys, "frozen", False):
+        return Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent))
+    return Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=(str(_REPO_ROOT / ".env"), ".env"),
-        env_file_encoding="utf-8",
-        extra="ignore",
-    )
+    model_config = SettingsConfigDict(env_prefix="TKWS_", extra="ignore")
 
-    app_env: Literal["development", "test", "staging", "production"] = "development"
-    public_origin: str = "http://localhost:5173"
+    app_env: Literal["production", "development", "test"] = "production"
+    data_dir: Path = Field(default_factory=default_data_dir)
 
-    db_host: str = "localhost"
-    db_port: int = 55432
-    db_name: str = "tk_workspace"
-    app_owner_password: SecretStr = SecretStr("")
-    app_runtime_password: SecretStr = SecretStr("")
-    app_dispatcher_password: SecretStr = SecretStr("")
-    postgres_superuser_password: SecretStr = SecretStr("")
-
-    redis_url: str = "redis://localhost:56379/0"
-
-    session_ttl_hours: int = 12
-
-    llm_base_url: str = ""
-    llm_api_key: SecretStr = SecretStr("")
-    llm_model_matching: str = ""
-    llm_model_brief: str = ""
-    llm_structured_mode: Literal["json_schema", "function_calling", "json_mode"] = "json_schema"
-    llm_timeout_seconds: int = 60
-    llm_data_region: str = ""
-    llm_provider_dpa_ref: str = ""
+    # 外壳每次启动生成，不落盘；为空时只允许开发模式（使用固定开发令牌）
+    launch_token: str = ""
+    parent_pid: int | None = None
+    allowed_origins: list[str] = ["http://tauri.localhost", "https://tauri.localhost", "tauri://localhost"]
 
     fastmoss_mcp_url: str = "https://mcp.fastmoss.com/mcp"
-    fastmoss_mcp_api_key: SecretStr = SecretStr("")
-
-    seed_dev_password: SecretStr = SecretStr("")
-
+    job_workers: int = Field(default=2, ge=1, le=8)
     job_lease_seconds: int = Field(default=300, ge=10)
-
-    def _dsn(self, driver: str, user: str, password: SecretStr, db: str | None = None) -> str:
-        pw = quote(password.get_secret_value(), safe="")
-        return f"postgresql+{driver}://{user}:{pw}@{self.db_host}:{self.db_port}/{db or self.db_name}"
-
-    # API 使用 asyncpg（兼容 Windows 默认事件循环）；Worker / 迁移使用同步 psycopg。
-    @property
-    def runtime_async_dsn(self) -> str:
-        return self._dsn("asyncpg", "app_runtime", self.app_runtime_password)
+    job_poll_seconds: float = Field(default=0.5, gt=0)
 
     @property
-    def runtime_sync_dsn(self) -> str:
-        return self._dsn("psycopg", "app_runtime", self.app_runtime_password)
+    def db_path(self) -> Path:
+        return self.data_dir / "data" / "app.db"
 
     @property
-    def dispatcher_sync_dsn(self) -> str:
-        return self._dsn("psycopg", "app_dispatcher", self.app_dispatcher_password)
+    def db_url(self) -> str:
+        return f"sqlite:///{self.db_path.as_posix()}"
 
     @property
-    def owner_sync_dsn(self) -> str:
-        return self._dsn("psycopg", "app_owner", self.app_owner_password)
+    def files_dir(self) -> Path:
+        return self.data_dir / "files"
 
     @property
-    def superuser_sync_dsn(self) -> str:
-        """仅供开发种子数据和测试夹具使用，生产环境禁止。"""
-        if self.app_env in ("staging", "production"):
-            raise RuntimeError("superuser DSN is not available outside development/test")
-        return self._dsn("psycopg", "postgres", self.postgres_superuser_password)
+    def logs_dir(self) -> Path:
+        return self.data_dir / "logs"
 
     @property
-    def is_dev_like(self) -> bool:
-        return self.app_env in ("development", "test")
+    def backups_dir(self) -> Path:
+        return self.data_dir / "backups"
 
-    def missing_required(self) -> list[str]:
-        missing = []
-        for name in ("app_runtime_password",):
-            if not getattr(self, name).get_secret_value():
-                missing.append(name.upper())
-        return missing
+    def ensure_dirs(self) -> None:
+        for d in (self.db_path.parent, self.files_dir, self.logs_dir, self.backups_dir):
+            d.mkdir(parents=True, exist_ok=True)
 
 
 @lru_cache

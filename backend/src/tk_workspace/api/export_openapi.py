@@ -5,11 +5,12 @@ import sys
 from pathlib import Path
 
 from tk_workspace.api.main import create_app
+from tk_workspace.config import Settings
 
 
 def main() -> None:
     out = Path(sys.argv[1] if len(sys.argv) > 1 else "openapi.json")
-    spec = create_app().openapi()
+    spec = create_app(Settings(app_env="development"), token="export-only").openapi()  # noqa: S106 — 只用于导出文档
     out.write_text(json.dumps(spec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(f"wrote {out}")
 

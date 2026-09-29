@@ -1,12 +1,13 @@
 """站点目录（全局、只读）。任务只保存 market_code，调用供应方时再映射地区码。"""
 
+import json
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy import text
 
-from tk_workspace.platform.db.session import runtime_tx
+from tk_workspace.platform.db.engine import tx
 
 DataStatus = Literal["queryable", "queryable_currency_unknown", "platform_unconfirmed", "manual_import_only"]
 
@@ -38,17 +39,21 @@ _SQL = """SELECT market_code, name_zh, name_en, region_group, settlement_currenc
           FROM markets"""
 
 
-async def list_markets(region_group: str | None = None) -> list[Market]:
+def _market(r) -> Market:
+    return Market(**{**r, "content_languages": json.loads(r["content_languages"])})
+
+
+def list_markets(region_group: str | None = None) -> list[Market]:
     sql = _SQL + (" WHERE region_group = :g" if region_group else "") + " ORDER BY sort_order"
-    async with runtime_tx() as s:
-        rows = (await s.execute(text(sql), {"g": region_group} if region_group else {})).mappings().all()
-    return [Market(**{**r, "settlement_currency": r["settlement_currency"].strip()}) for r in rows]
+    with tx() as s:
+        rows = s.execute(text(sql), {"g": region_group} if region_group else {}).mappings().all()
+    return [_market(r) for r in rows]
 
 
-async def get_market(code: str) -> Market | None:
-    async with runtime_tx() as s:
-        r = (await s.execute(text(_SQL + " WHERE market_code = :c"), {"c": code.upper()})).mappings().first()
-    return Market(**{**r, "settlement_currency": r["settlement_currency"].strip()}) if r else None
+def get_market(code: str) -> Market | None:
+    with tx() as s:
+        r = s.execute(text(_SQL + " WHERE market_code = :c"), {"c": code.upper()}).mappings().first()
+    return _market(r) if r else None
 
 
 def fastmoss_region_for(market: Market) -> str:
@@ -62,13 +67,13 @@ router = APIRouter(prefix="/markets", tags=["markets"])
 
 
 @router.get("", response_model=list[Market], summary="站点目录")
-async def markets_index(region_group: str | None = "europe") -> list[Market]:
-    return await list_markets(region_group)
+def markets_index(region_group: str | None = "europe") -> list[Market]:
+    return list_markets(region_group)
 
 
 @router.get("/{market_code}", response_model=Market, summary="单个站点")
-async def market_detail(market_code: str) -> Market:
-    m = await get_market(market_code)
+def market_detail(market_code: str) -> Market:
+    m = get_market(market_code)
     if not m:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail={"code": "not_found", "message": "站点不存在"})
     return m

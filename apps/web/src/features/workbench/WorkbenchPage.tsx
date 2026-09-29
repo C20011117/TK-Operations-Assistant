@@ -1,7 +1,8 @@
-import { Badge, Card } from "@/components/ui";
-import { useCurrent } from "@/app/useCurrent";
+import { Link } from "react-router";
 
-// 待办分组来自产品规格“核心界面建议”。M0 尚无业务数据，按里程碑标明何时开放，不显示虚构数字。
+import { Badge, Card } from "@/components/ui";
+
+// 待办分组来自产品规格“核心界面建议”。尚无业务数据，按里程碑标明何时开放，不显示虚构数字。
 const groups = [
   { key: "to_ship", label: "待寄样", milestone: "M3" },
   { key: "to_brief", label: "待发拍摄包", milestone: "M4" },
@@ -13,13 +14,16 @@ const groups = [
 ];
 
 export function WorkbenchPage() {
-  const { me, current } = useCurrent();
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold">你好，{me.display_name}</h1>
+        <h1 className="text-xl font-semibold">我的工作台</h1>
         <p className="mt-1 text-sm text-slate-500">
-          {current.tenant_name} · 今天该推进谁，会按下面的分组列出来。
+          今天该推进谁，会按下面的分组列出来。首次使用请先到
+          <Link to="/settings" className="mx-1 text-slate-900 underline">
+            设置
+          </Link>
+          填写 FastMoss 与大模型的 API Key。
         </p>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

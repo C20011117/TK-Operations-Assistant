@@ -1,7 +1,6 @@
 # 环境与密钥
 .env
 .env.*
-!.env.example
 
 # Python
 __pycache__/
@@ -15,6 +14,12 @@ __pycache__/
 node_modules/
 dist/
 *.tsbuildinfo
+
+# 打包产物
+backend/build/
+backend/dist/
+apps/desktop/src-tauri/target/
+apps/desktop/src-tauri/gen/schemas/
 
 # FastMoss 原始响应与探测数据（条款要求保密，不进版本库）
 probe/

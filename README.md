@@ -2,44 +2,44 @@
 
 以企业自己的产品、预算和合作经验为依据，结合用户授权的 FastMoss 数据，帮助同一名 BD 独立完成找人、寄样、拍摄指导、视频回收反馈、持续产出、达人分类和长期维护。
 
-当前仓库状态：**完整架构设计 + 纵向切片实施中（M0 工程地基已完成，业务功能尚未实现）**。纵向切片以欧洲站点为先，范围和里程碑见 [纵向切片方案](docs/纵向切片方案.md)。未作性能或业务效果承诺。
+**形态：Windows 桌面应用**。双击安装、双击运行，单机使用，数据只保存在本机，不需要 Docker、数据库服务或浏览器。
 
-- [纵向切片方案](docs/纵向切片方案.md)：当前实施范围、欧洲 11 站、里程碑 M0–M5 与 FastMoss 预算。
-- [架构总入口](docs/architecture/README.md)：技术选型、系统图、数据模型、AI 流程、接口、前端、安全、部署和验收。
-- [最终产品规格](docs/product/final-spec.md)：本次设计的需求基线。
-- [系统与工程结构](docs/architecture/01-system-design.md)：从部署组件到代码组织的说明。
-- [完整验收与需求追踪](docs/architecture/06-verification-and-traceability.md)：判定应用能否交付的证据要求。
+当前状态：**桌面版工程地基（M0-D）已完成，业务功能尚未实现**。纵向切片以欧洲站点为先。未作性能或业务效果承诺。
 
-核心技术方案为 React + TypeScript 前端、FastAPI 模块化单体、独立异步 Worker、PostgreSQL + pgvector、Redis、对象存储，以及在 Worker 内运行的 LangChain / LangGraph。详细约束以架构文档为准。
+- [桌面版架构方案](docs/桌面版架构方案.md)：当前生效的技术方案（Tauri 外壳 + 本机 Python 后端 + SQLite）。
+- [纵向切片方案](docs/纵向切片方案.md)：实施范围、欧洲 11 站、里程碑与 FastMoss 预算。
+- [最终产品规格](docs/product/final-spec.md)：需求基线。
+- [原服务器版架构](docs/architecture/README.md)：业务流程、数据模型、AI 流程仍作参考；部署与多租户部分已被桌面版方案取代。
 
-## 本地开发
+## 使用
 
-需要：Docker Desktop、Python 3.12 + [uv](https://docs.astral.sh/uv/)、Node 24 + pnpm 10、Git Bash（Windows）。
+运行安装包 `TK达人工作台_<版本>_x64-setup.exe`（安装到当前用户，无需管理员权限），从开始菜单或桌面打开。首次使用在“设置”页填写 FastMoss 与大模型的 API Key（保存在 Windows 凭据管理器）。
+
+数据位置：`%LOCALAPPDATA%\TKWorkspace\`（`data\app.db` 数据库、`logs\` 日志）。卸载程序不会删除这个目录。
+
+## 开发
+
+需要：Python 3.12 + [uv](https://docs.astral.sh/uv/)、Node 24 + pnpm 10、Rust（stable，MSVC 工具链）、WebView2（Windows 10/11 自带）。
 
 ```bash
-./scripts/init-env.sh      # 生成 .env（随机本地密码），再手动填 LLM_* 与 FASTMOSS_MCP_API_KEY
-./scripts/dev-up.sh        # Docker 起 PostgreSQL/Redis/MinIO → 迁移 → 种子账号 → Worker 与分发器
-cd backend && uv run uvicorn tk_workspace.api.main:app --reload --port 8000
-cd apps/web && pnpm install && pnpm dev    # 打开 http://localhost:5173
+# 方式一：完整桌面窗口（外壳自动用 uv 启动后端、启动 Vite）
+cd apps/web && pnpm install
+cd ../desktop && pnpm install && pnpm dev
+
+# 方式二：只在浏览器里调界面
+cd backend && uv run python -m tk_workspace.desktop --dev    # 固定端口 8765、开发令牌
+cd apps/web && pnpm dev                                       # 打开 http://localhost:5173
 ```
 
-开发账号（密码为 `.env` 中的 `SEED_DEV_PASSWORD`）：
+打包安装包（PowerShell）：`.\scripts\build-desktop.ps1`，产物在 `apps\desktop\src-tauri\target\release\bundle\nsis\`。
 
-| 账号 | 企业 | 角色 |
-|---|---|---|
-| admin@demo.local | 演示企业 | 管理员 |
-| bd.a@demo.local / bd.b@demo.local | 演示企业 | BD（彼此数据隔离） |
-| bd.c@other.local | 另一家企业 | BD（跨企业隔离验证） |
-
-常用命令：`./scripts/test.sh`（全部检查）、`cd backend && uv run python ../scripts/m0_acceptance.py`（M0 端到端验收，需服务均在运行）、`./scripts/gen-api.sh`（后端接口变化后重新生成前端类型）、`cd backend && uv run pytest -m live`（真实调用 FastMoss，仅免费接口）。
-
-本地端口：PostgreSQL 55432、Redis 56379、MinIO 59000/59001、API 8000、前端 5173。
+常用命令：`./scripts/test.sh`（全部检查）、`./scripts/gen-api.sh`（后端接口变化后重新生成前端类型）、`cd backend && uv run pytest -m live`（真实调用 FastMoss，仅免费接口，需先在设置页保存 Key）。
 
 | 目录 | 内容 |
 |---|---|
-| `backend/` | FastAPI 模块化单体、Celery Worker、Outbox 分发器、Alembic 迁移、测试 |
-| `apps/web/` | React + Vite 前端，接口类型由 OpenAPI 生成 |
-| `infra/compose/` | 本地 Docker Compose 与数据库角色初始化 |
+| `apps/desktop/` | Tauri 2 外壳（Rust）：启动/看护后端、单实例、安装包配置 |
+| `apps/web/` | React + Vite 界面，接口类型由 OpenAPI 生成 |
+| `backend/` | FastAPI 本机后端、SQLite + Alembic 迁移、应用内任务执行器、PyInstaller 打包配置、测试 |
 | `docs/` | 产品规格、架构设计、纵向切片方案 |
 
-文档修订日期：2026-09-29。架构文档中的路径结构、接口、指标目标及 JSON 为拟实现设计；已实现部分以代码和测试为准。
+文档修订日期：2026-09-29。
