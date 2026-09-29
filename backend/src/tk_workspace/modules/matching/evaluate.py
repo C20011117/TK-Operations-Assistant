@@ -35,6 +35,7 @@ def build_observations(
     reporting_currency: str,
     product_price: str | None,
     product_price_currency: str | None,
+    product_category: str | None = None,
 ) -> dict[str, dict[str, Any]]:
     """规范化记录 → 观测。每条观测：{value, state, currency?, note}。"""
     m = record.get("metrics") or {}
@@ -113,6 +114,29 @@ def build_observations(
     put("follower_age", (record.get("audience") or {}).get("top_age"))
     if record.get("categories"):
         put("categories", record["categories"])
+
+    # 与产品的类目相关性（M2.1）
+    sales = [x for x in record.get("competitor_sales") or [] if x.get("product_id")]
+    if sales:
+        put("competitor_sales", "；".join(_describe_sale(x) for x in sales[:3]))
+    if sales:
+        names = "、".join(f"《{(x.get('title') or x['product_id'])[:40]}》" for x in sales[:3])
+        put("category_match", True, note=f"卖过竞品 {names}")
+    elif record.get("category_guaranteed"):
+        put(
+            "category_match",
+            True,
+            note=f"FastMoss 记录其带过「{record['category_guaranteed']}」类目商品（按类目搜索找到，不代表主营方向）",
+        )
+    elif product_category:
+        put(
+            "category_match",
+            None,
+            "unknown",
+            "只凭关键词或人工导入找到；数据源只返回一级带货类目名称，无法确认是否带过本产品类目",
+        )
+    else:
+        put("category_match", None, "unknown", "产品没有设置 TikTok 商品类目，无法判断")
     put("content_language", None, "unknown", "FastMoss 不提供内容语言，需人工查看视频确认")
     put(
         "selling_eligibility",
@@ -121,6 +145,25 @@ def build_observations(
         "FastMoss 的地区是达人所在地，不能证明其具备该站点带货资格",
     )
     return obs
+
+
+def _describe_sale(x: dict[str, Any]) -> str:
+    title = (x.get("title") or f"商品 {x.get('product_id')}")[:40]
+    parts = []
+    if x.get("product_units_sold") is not None:
+        parts.append(f"销量 {x['product_units_sold']} 件")
+    if x.get("product_gmv") is not None:
+        parts.append(f"GMV {x['product_gmv']} {x.get('currency') or '（币种未知）'}")
+    return f"《{title}》" + ("：" + "，".join(parts) if parts else "")
+
+
+def relevance_rank(obs: dict[str, Any]) -> int:
+    """与产品的相关性：0 卖过竞品 / 1 带过本产品类目 / 2 未知。用于 AI 判断的候选选择和排序。"""
+    if (obs.get("competitor_sales") or {}).get("state") == "known":
+        return 0
+    if (obs.get("category_match") or {}).get("value") is True:
+        return 1
+    return 2
 
 
 def _cmp(op: str, actual: Decimal, exp: Any) -> bool:

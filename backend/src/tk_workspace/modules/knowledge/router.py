@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException
 
 from tk_workspace.modules.knowledge import service
 from tk_workspace.modules.knowledge.schemas import (
+    CategorySuggestion,
+    CategorySuggestionsIn,
     DraftIn,
     ProductCreate,
     ProductDetail,
@@ -28,6 +30,15 @@ def products_index(include_archived: bool = False) -> list[ProductSummary]:
 @router.post("", response_model=ProductDetail, status_code=201, summary="新建产品（同时生成空白草稿 v1）")
 def products_create(body: ProductCreate) -> ProductDetail:
     return _run(service.create_product, body)
+
+
+@router.post(
+    "/category-suggestions",
+    response_model=list[CategorySuggestion],
+    summary="根据产品名称 / 品类词推荐 TikTok 商品类目（FastMoss，不扣费）",
+)
+def products_category_suggestions(body: CategorySuggestionsIn) -> list[CategorySuggestion]:
+    return _run(service.suggest_categories, body.query)
 
 
 @router.get("/{product_id}", response_model=ProductDetail, summary="产品详情（当前版本、草稿、版本历史）")

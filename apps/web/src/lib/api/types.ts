@@ -30,3 +30,10 @@ export type RecommendationsView = S["RecommendationsView"];
 export type RecommendationCard = S["RecommendationCard"];
 export type CardPoint = S["CardPoint"];
 export type CardNote = S["CardNote"];
+
+export type ProductCategory = S["ProductCategory"];
+export type CategorySuggestion = S["CategorySuggestion"];
+export type SearchInput = S["SearchInput"];
+export type Competitor = S["Competitor"];
+export type CompetitorSuggestion = S["CompetitorSuggestion"];
+export type CompetitorSuggestionsView = S["CompetitorSuggestionsView"];

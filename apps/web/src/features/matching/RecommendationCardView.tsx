@@ -80,6 +80,8 @@ export function RecommendationCardView({ card }: { card: RecommendationCard }) {
           {c.unique_id && <span className="ml-2 text-sm text-slate-500">@{c.unique_id}</span>}
           {card.ai.summary && <span className="block truncate text-sm text-slate-600">{card.ai.summary}</span>}
         </span>
+        {card.matches.some((p) => p.tag === "竞品") && <Badge tone="blue">卖过竞品</Badge>}
+        {card.matches.some((p) => p.tag === "类目") && <Badge tone="green">带过同类目</Badge>}
         {fit && <Badge tone={fit === "high" ? "green" : fit === "low" ? "red" : "slate"}>{fitLabels[fit]}</Badge>}
         {card.ai.status === "failed" && <Badge tone="amber">AI 判断失败</Badge>}
         {card.anomalies.length > 0 && <Badge tone="amber">数据异常 {card.anomalies.length}</Badge>}

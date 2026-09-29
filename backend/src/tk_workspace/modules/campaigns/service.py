@@ -128,8 +128,29 @@ def _readiness(
     else:
         crit = json.loads(criteria_row["criteria"])
         search = json.loads(criteria_row["search"])
-        if not crit and not search.get("keywords"):
+        pv_facts = s.execute(
+            text("SELECT facts FROM product_versions WHERE id = :id"), {"id": cm["product_version_id"]}
+        ).scalar_one()
+        has_category = bool(json.loads(pv_facts).get("category"))
+        by_category = has_category and search.get("use_product_category", True)
+        has_scope = bool(search.get("keywords")) or by_category or bool(search.get("competitors"))
+        if not crit and not has_scope:
             blockers.append(Issue(code="criteria_empty", message="至少填写一个搜索关键词或一个条件"))
+        if not manual_only:
+            if not has_category:
+                warnings.append(
+                    Issue(
+                        code="product_category_missing",
+                        message="产品没有设置 TikTok 商品类目，无法按类目找达人（可在产品档案中设置）",
+                    )
+                )
+            if not has_scope:
+                warnings.append(
+                    Issue(
+                        code="search_scope_broad",
+                        message="没有关键词、商品类目或竞品，只能按粉丝数等条件泛搜，找到的人可能与产品无关",
+                    )
+                )
         if crit and not any(c["hardness"] == "hard" for c in crit):
             warnings.append(Issue(code="no_hard_criteria", message="没有硬条件，所有候选都会进入推荐"))
         not_provided_hard = [

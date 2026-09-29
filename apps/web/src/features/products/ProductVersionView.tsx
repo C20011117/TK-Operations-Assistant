@@ -33,6 +33,10 @@ export function ProductVersionView({ v }: { v: ProductVersion }) {
         <span>确认于 {fmtTime(v.confirmed_at)}</span>
       </div>
       <p className="text-sm">{f.summary || <span className="text-slate-400">未填写简介</span>}</p>
+      <p className="mt-1 text-sm">
+        <span className="text-slate-500">TikTok 商品类目：</span>
+        {f.category ? f.category.path : <span className="text-amber-700">未设置</span>}
+      </p>
       <dl className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <List label="主要卖点" items={f.selling_points ?? []} />
         <List label="使用场景" items={f.use_scenarios ?? []} />

@@ -3,7 +3,13 @@ from typing import Annotated
 from fastapi import APIRouter, Header, HTTPException, Response
 
 from tk_workspace.modules.matching import service
-from tk_workspace.modules.matching.schemas import ManualImportIn, RecommendationsView, RunView
+from tk_workspace.modules.matching.schemas import (
+    CompetitorSuggestionsIn,
+    CompetitorSuggestionsView,
+    ManualImportIn,
+    RecommendationsView,
+    RunView,
+)
 
 router = APIRouter(tags=["matching"])
 IdemKey = Annotated[str, Header(alias="Idempotency-Key", min_length=8, max_length=200)]
@@ -68,3 +74,12 @@ def recommendations(run_id: str) -> RecommendationsView:
 @router.post("/matching-runs/{run_id}/cancel", response_model=RunView, summary="取消匹配")
 def cancel(run_id: str) -> RunView:
     return _call(service.cancel_run, run_id)
+
+
+@router.post(
+    "/campaign-markets/{cm_id}/competitor-suggestions",
+    response_model=CompetitorSuggestionsView,
+    summary="按产品类目推荐本站点的同类在售商品作为竞品（FastMoss，每次 1 额度）",
+)
+def competitor_suggestions(cm_id: str, body: CompetitorSuggestionsIn) -> CompetitorSuggestionsView:
+    return _call(service.suggest_competitors, cm_id, body.keywords)

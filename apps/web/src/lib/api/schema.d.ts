@@ -210,6 +210,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/products/category-suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 根据产品名称 / 品类词推荐 TikTok 商品类目（FastMoss，不扣费） */
+        post: operations["products_category_suggestions_api_v1_products_category_suggestions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/products/{product_id}": {
         parameters: {
             query?: never;
@@ -574,6 +591,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/campaign-markets/{cm_id}/competitor-suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 按产品类目推荐本站点的同类在售商品作为竞品（FastMoss，每次 1 额度） */
+        post: operations["competitor_suggestions_api_v1_campaign_markets__cm_id__competitor_suggestions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -815,6 +849,90 @@ export interface components {
              * @default []
              */
             evidence: components["schemas"]["EvidenceRef"][];
+        };
+        /** CategorySuggestion */
+        CategorySuggestion: {
+            /** L1 Id */
+            l1_id: number;
+            /** L2 Id */
+            l2_id: number | null;
+            /** L3 Id */
+            l3_id: number | null;
+            /** Name */
+            name: string | null;
+            /** Path */
+            path: string | null;
+            /** Score */
+            score: string | null;
+            /** Matched Query */
+            matched_query: string | null;
+        };
+        /** CategorySuggestionsIn */
+        CategorySuggestionsIn: {
+            /**
+             * Query
+             * @description 产品名称或品类词，中英文均可
+             */
+            query: string[];
+        };
+        /**
+         * Competitor
+         * @description 竞品：卖过它的达人会优先进入候选。product_id 可以直接粘贴 TikTok 商品链接。
+         */
+        Competitor: {
+            /**
+             * Product Id
+             * @description TikTok 商品编号或商品链接
+             */
+            product_id: string;
+            /** Title */
+            title?: string | null;
+            /** Currency */
+            currency?: string | null;
+        };
+        /** CompetitorSuggestion */
+        CompetitorSuggestion: {
+            /** Product Id */
+            product_id: string;
+            /** Title */
+            title: string | null;
+            /** Category Path */
+            category_path: string | null;
+            /** Currency */
+            currency: string | null;
+            /** Price Display */
+            price_display: string | null;
+            /** Day28 Units Sold */
+            day28_units_sold: string | null;
+            /** Day28 Gmv */
+            day28_gmv: string | null;
+            /** Linked Creator Count */
+            linked_creator_count: string | null;
+            /** Shop Name */
+            shop_name: string | null;
+        };
+        /** CompetitorSuggestionsIn */
+        CompetitorSuggestionsIn: {
+            /**
+             * Keywords
+             * @description 可选：竞品关键词（英文效果更好）
+             */
+            keywords?: string | null;
+        };
+        /** CompetitorSuggestionsView */
+        CompetitorSuggestionsView: {
+            /** Items */
+            items: components["schemas"]["CompetitorSuggestion"][];
+            /**
+             * Credits Used
+             * @description 本次推荐消耗的 FastMoss 额度
+             */
+            credits_used: number;
+            /**
+             * Category Path
+             * @description 按哪个产品类目推荐；为空表示只按关键词
+             */
+            category_path: string | null;
         };
         /** CreateJobRequest */
         CreateJobRequest: {
@@ -1283,6 +1401,23 @@ export interface components {
              */
             note: string;
         };
+        /**
+         * ProductCategory
+         * @description TikTok 商品类目（来自 FastMoss 类目识别，用户确认）。按类目找达人时使用最深的一级。
+         */
+        ProductCategory: {
+            /** L1 Id */
+            l1_id: number;
+            /** L2 Id */
+            l2_id?: number | null;
+            /** L3 Id */
+            l3_id?: number | null;
+            /**
+             * Path
+             * @description 中文类目路径，如“手机与数码-摄影摄像-监控摄像设备”
+             */
+            path: string;
+        };
         /** ProductCreate */
         ProductCreate: {
             /** Sku */
@@ -1361,6 +1496,8 @@ export interface components {
              * @default
              */
             notes: string;
+            /** @description TikTok 商品类目；用于按类目找达人 */
+            category?: components["schemas"]["ProductCategory"] | null;
         };
         /** ProductRef */
         ProductRef: {
@@ -1581,6 +1718,30 @@ export interface components {
              * @description 搜索关键词（产品、品类、内容主题）
              */
             keywords?: string[];
+            /**
+             * Use Product Category
+             * @description 按产品的 TikTok 商品类目搜索（产品设置了类目时生效）
+             * @default true
+             */
+            use_product_category: boolean;
+            /**
+             * Category Level
+             * @description 按第几级类目搜索；产品类目没有该级时用更上一级
+             * @default l3
+             * @enum {string}
+             */
+            category_level: "l3" | "l2" | "l1";
+            /**
+             * Competitors
+             * @description 竞品，最多 3 个
+             */
+            competitors?: components["schemas"]["Competitor"][];
+            /**
+             * Enrich Competitor Creators
+             * @description 用 creator_search 补全竞品达人的近 28 天数据（每人 1 额度，不超过目标名单数）
+             * @default true
+             */
+            enrich_competitor_creators: boolean;
         };
         /** SettingsView */
         SettingsView: {
@@ -2018,6 +2179,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProductDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    products_category_suggestions_api_v1_products_category_suggestions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CategorySuggestionsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategorySuggestion"][];
                 };
             };
             /** @description Validation Error */
@@ -2910,6 +3104,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    competitor_suggestions_api_v1_campaign_markets__cm_id__competitor_suggestions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompetitorSuggestionsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompetitorSuggestionsView"];
                 };
             };
             /** @description Validation Error */

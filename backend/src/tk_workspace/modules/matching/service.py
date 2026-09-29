@@ -452,3 +452,63 @@ def cancel_run(run_id: str) -> RunView:
                 {"n": utcnow_iso(), "id": run_id},
             )
     return get_run(run_id)
+
+
+def suggest_competitors(cm_id: str, keywords: str | None) -> dict[str, Any]:
+    """按产品类目（及可选关键词）在本站点搜同类在售商品，作为竞品候选。每次 1 额度，不缓存。"""
+    from tk_workspace.integrations.fastmoss import catalog
+
+    with tx() as s:
+        cm = (
+            s.execute(
+                text(
+                    """SELECT cm.id, cm.product_version_id, m.data_status, m.fastmoss_region, m.name_zh,
+                              (SELECT product_version_id FROM criteria_versions cv
+                                WHERE cv.campaign_market_id = cm.id AND cv.status = 'draft') AS draft_pv
+                       FROM campaign_markets cm JOIN markets m ON m.market_code = cm.market_code
+                       WHERE cm.id = :id"""
+                ),
+                {"id": cm_id},
+            )
+            .mappings()
+            .first()
+        )
+        if cm is None:
+            raise MatchingError("not_found", "任务站点不存在", 404)
+        if cm["data_status"] == "manual_import_only" or not cm["fastmoss_region"]:
+            raise MatchingError("manual_import_only", f"{cm['name_zh']}没有 FastMoss 数据，不能推荐竞品")
+        facts = s.execute(
+            text("SELECT facts FROM product_versions WHERE id = :id"),
+            {"id": cm["draft_pv"] or cm["product_version_id"]},
+        ).scalar_one()
+    category = json.loads(facts).get("category")
+    kw = (keywords or "").strip() or None
+    if not category and not kw:
+        raise MatchingError(
+            "need_category_or_keywords", "产品没有设置 TikTok 商品类目，请先设置类目或填写竞品关键词", 422
+        )
+    if provider.transport_name() == "mcp":
+        from tk_workspace.modules.settings.service import get_fastmoss_key
+
+        if not get_fastmoss_key():
+            raise MatchingError("fastmoss_not_configured", "还没有填写 FastMoss API Key，请到设置页填写")
+    path = None
+    if category:
+        path = [category[k] for k in ("l1_id", "l2_id", "l3_id") if category.get(k)]
+    params = catalog.ProductSearchParams(
+        filter=catalog.ProductSearchFilter(region=cm["fastmoss_region"], category_path=path),
+        keywords=kw,
+        orderby=[catalog.ProductOrderBy(field="day28_units_sold")],
+    )
+    out = provider.call_direct("product.search", params)
+    if out.status == "unauthorized":
+        raise MatchingError("fastmoss_unauthorized", "FastMoss 拒绝了 API Key，请到设置页检查", 502)
+    if out.status == "insufficient_credits":
+        raise MatchingError("insufficient_credits", "FastMoss 账户额度不足", 402)
+    if out.status not in ("succeeded", "empty"):
+        raise MatchingError("fastmoss_failed", f"竞品搜索失败：{out.message or out.status}", 502)
+    return {
+        "items": out.records,
+        "credits_used": out.credits,
+        "category_path": category.get("path") if category else None,
+    }

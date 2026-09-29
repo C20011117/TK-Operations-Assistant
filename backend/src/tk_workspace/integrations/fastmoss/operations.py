@@ -11,7 +11,8 @@ from typing import Any
 from pydantic import BaseModel
 
 from tk_workspace.config import get_settings
-from tk_workspace.integrations.fastmoss.creator_search import CreatorSearchParams
+from tk_workspace.integrations.fastmoss import catalog
+from tk_workspace.integrations.fastmoss.creator_search import CreatorSearchParams, normalize_search_result
 from tk_workspace.integrations.fastmoss.mcp_client import FastMossMCPClient, ToolResult
 
 
@@ -25,6 +26,8 @@ class ProviderOperation:
     tool: str
     params_model: type[BaseModel]
     credit_cost_estimate: Callable[[BaseModel], int]
+    # 原始响应 → (规范化记录, total)；只保存白名单字段
+    normalize: Callable[[Any, BaseModel], tuple[list[dict[str, Any]], int | None]] | None = None
 
 
 OPERATIONS: dict[str, ProviderOperation] = {
@@ -39,6 +42,28 @@ OPERATIONS: dict[str, ProviderOperation] = {
         tool="creator_search",
         params_model=CreatorSearchParams,
         credit_cost_estimate=lambda _p: 1,  # 2026-09-29 实测每次 1 额度；空结果不扣
+        normalize=normalize_search_result,
+    ),
+    "category.search": ProviderOperation(
+        name="category.search",
+        tool="search_category_by_words",
+        params_model=catalog.CategorySearchParams,
+        credit_cost_estimate=lambda _p: 0,  # 2026-09-29 实测不扣费
+        normalize=catalog.normalize_categories,
+    ),
+    "product.search": ProviderOperation(
+        name="product.search",
+        tool="product_search",
+        params_model=catalog.ProductSearchParams,
+        credit_cost_estimate=lambda _p: 1,  # 2026-09-29 实测每次 1 额度
+        normalize=catalog.normalize_products,
+    ),
+    "product.creators": ProviderOperation(
+        name="product.creators",
+        tool="product_creator_analysis",
+        params_model=catalog.ProductCreatorsParams,
+        credit_cost_estimate=lambda _p: 3,  # 2026-09-29 实测每次 3 额度
+        normalize=catalog.normalize_linked_creators,
     ),
 }
 

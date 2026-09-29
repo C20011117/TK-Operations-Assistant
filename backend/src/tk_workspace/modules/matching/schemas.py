@@ -122,6 +122,28 @@ class RecommendationsView(BaseModel):
     cards: list[RecommendationCard]
 
 
+class CompetitorSuggestionsIn(BaseModel):
+    keywords: str | None = Field(None, max_length=100, description="可选：竞品关键词（英文效果更好）")
+
+
+class CompetitorSuggestion(BaseModel):
+    product_id: str
+    title: str | None
+    category_path: str | None
+    currency: str | None
+    price_display: str | None
+    day28_units_sold: str | None
+    day28_gmv: str | None
+    linked_creator_count: str | None
+    shop_name: str | None
+
+
+class CompetitorSuggestionsView(BaseModel):
+    items: list[CompetitorSuggestion]
+    credits_used: int = Field(description="本次推荐消耗的 FastMoss 额度")
+    category_path: str | None = Field(description="按哪个产品类目推荐；为空表示只按关键词")
+
+
 class ManualImportIn(BaseModel):
     csv: str = Field(..., max_length=500_000, description="CSV 文本，第一行为表头")
     filename: str = Field("", max_length=200)

@@ -11,7 +11,7 @@ import uuid
 from decimal import Decimal, InvalidOperation
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 Support = Literal["search_filter", "result_field", "not_provided"]
 Operator = Literal["between", "gte", "lte", "eq", "in"]
@@ -175,9 +175,37 @@ class Criterion(BaseModel):
     note: str = Field("", max_length=200)
 
 
+class Competitor(BaseModel):
+    """竞品：卖过它的达人会优先进入候选。product_id 可以直接粘贴 TikTok 商品链接。"""
+
+    product_id: str = Field(..., max_length=500, description="TikTok 商品编号或商品链接")
+    title: str | None = Field(None, max_length=300)
+    currency: str | None = Field(None, pattern=r"^[A-Z]{3}$")
+
+    @field_validator("product_id")
+    @classmethod
+    def _pid(cls, v: str) -> str:
+        from tk_workspace.integrations.fastmoss.catalog import parse_product_ref
+
+        pid = parse_product_ref(v)
+        if pid is None:
+            raise ValueError("无法识别商品编号：请粘贴 TikTok 商品链接或 15–21 位数字编号")
+        return pid
+
+
 class SearchInput(BaseModel):
     keywords: list[str] = Field(
         default_factory=list, max_length=5, description="搜索关键词（产品、品类、内容主题）"
+    )
+    use_product_category: bool = Field(
+        True, description="按产品的 TikTok 商品类目搜索（产品设置了类目时生效）"
+    )
+    category_level: Literal["l3", "l2", "l1"] = Field(
+        "l3", description="按第几级类目搜索；产品类目没有该级时用更上一级"
+    )
+    competitors: list[Competitor] = Field(default_factory=list, max_length=3, description="竞品，最多 3 个")
+    enrich_competitor_creators: bool = Field(
+        True, description="用 creator_search 补全竞品达人的近 28 天数据（每人 1 额度，不超过目标名单数）"
     )
 
 
@@ -297,4 +325,9 @@ def normalize_search(search: SearchInput) -> tuple[SearchInput, list[CriteriaIss
             continue
         if w.lower() not in (x.lower() for x in words):
             words.append(w)
-    return SearchInput(keywords=words), issues
+    comps, ids = [], set()
+    for c in search.competitors:
+        if c.product_id not in ids:
+            ids.add(c.product_id)
+            comps.append(c)
+    return search.model_copy(update={"keywords": words, "competitors": comps}), issues

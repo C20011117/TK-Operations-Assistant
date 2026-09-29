@@ -10,6 +10,7 @@ import { collabLabels, fmtTime, goalLabels, localNow, money, operatorLabels, sam
 import { MatchingPanel } from "@/features/matching/MatchingPanel";
 
 import { CriteriaEditor, type Row, useFieldSpecs } from "./CriteriaEditor";
+import { ProductSearchOptions, searchOptsFrom } from "./ProductSearchOptions";
 
 function useSetCampaign(id: string) {
   const qc = useQueryClient();
@@ -166,6 +167,7 @@ function CriteriaCard({ c, cm }: { c: CampaignDetail; cm: CampaignMarketView }) 
   const base = cm.criteria_draft ?? cm.criteria_current;
   const [rows, setRows] = useState<Row[]>(() => (base?.criteria ?? []) as Row[]);
   const [keywords, setKeywords] = useState((base?.search.keywords ?? []).join("，"));
+  const [opts, setOpts] = useState(() => searchOptsFrom(base?.search));
   const [dirty, setDirty] = useState(false);
   const archived = c.status === "archived";
 
@@ -176,7 +178,7 @@ function CriteriaCard({ c, cm }: { c: CampaignDetail; cm: CampaignMarketView }) 
           params: { path: { cm_id: cm.id } },
           body: {
             criteria: rows as never,
-            search: { keywords: keywords.split(/[,，\n]/).map((s) => s.trim()).filter(Boolean) },
+            search: { ...opts, keywords: keywords.split(/[,，\n]/).map((s) => s.trim()).filter(Boolean) },
           },
         }),
       ),
@@ -192,6 +194,7 @@ function CriteriaCard({ c, cm }: { c: CampaignDetail; cm: CampaignMarketView }) 
       const cur = d.markets[0]?.criteria_current;
       setRows((cur?.criteria ?? []) as Row[]);
       setKeywords((cur?.search.keywords ?? []).join("，"));
+      setOpts(searchOptsFrom(cur?.search));
       setDirty(false);
     },
   });
@@ -232,6 +235,18 @@ function CriteriaCard({ c, cm }: { c: CampaignDetail; cm: CampaignMarketView }) 
             placeholder="portable blender, smoothie"
           />
         </Field>
+      </div>
+      <div className="mb-4">
+        <ProductSearchOptions
+          cmId={cm.id}
+          value={opts}
+          onChange={(o) => {
+            setOpts(o);
+            setDirty(true);
+          }}
+          targetSize={cm.target_list_size}
+          disabled={archived}
+        />
       </div>
       <CriteriaEditor
         rows={rows}

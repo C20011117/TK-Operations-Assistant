@@ -25,6 +25,11 @@ class SearchFilter(BaseModel):
     creator_type: Literal[1, 2] | None = None
     is_ecommerce_creator: bool | None = None
     follower_age_type: Literal[1, 2, 3] | None = None
+    # 带货商品类目（M2.1）：含义是“带过该类目商品”，不等于主营方向
+    product_category_l1_id: int | None = None
+    product_category_l2_id: int | None = None
+    product_category_l3_id: int | None = None
+    uid: str | None = Field(None, max_length=40)  # 按 uid 精确查询（补全竞品达人数据）
 
 
 class OrderBy(BaseModel):
@@ -238,6 +243,11 @@ def extract_list(data: Any) -> tuple[list[dict[str, Any]], int | None]:
             if inner:
                 return inner, _int(total) if total is not None else t
     return [], _int(total)
+
+
+def normalize_search_result(data: Any, _params: Any = None) -> tuple[list[dict[str, Any]], int | None]:
+    raw, total = extract_list(data)
+    return [normalize_record(r) for r in raw], total
 
 
 def _int(v: Any) -> int | None:

@@ -41,7 +41,8 @@ def _not_found() -> ProductError:
 
 def _hash(draft: DraftIn) -> str:
     payload = {
-        "facts": draft.facts.model_dump(mode="json"),
+        # 未设置类目时不写入该键，保证加字段前后同样内容的哈希不变
+        "facts": draft.facts.model_dump(mode="json", exclude_none=True),
         "terms": sorted(
             (t.model_dump(mode="json") for t in draft.market_terms), key=lambda t: t["market_code"]
         ),
@@ -377,3 +378,19 @@ def set_archived(product_id: str, archived: bool) -> ProductDetail:
             return _detail(s, product_id)
     except IntegrityError as e:
         raise ProductError("sku_exists", "已有同 SKU 的在用产品，不能恢复") from e
+
+
+def suggest_categories(query: list[str]) -> list[dict]:
+    """FastMoss 类目识别（不扣费）。未配置 Key 或调用失败时给出明确错误，不返回猜测结果。"""
+    from tk_workspace.integrations.fastmoss.catalog import CategorySearchParams
+    from tk_workspace.modules.matching import provider
+    from tk_workspace.modules.settings.service import get_fastmoss_key
+
+    if provider.transport_name() == "mcp" and not get_fastmoss_key():
+        raise ProductError("fastmoss_not_configured", "请先在设置页填写 FastMoss API Key", 409)
+    out = provider.call_direct("category.search", CategorySearchParams(query=query))
+    if out.status in ("succeeded", "empty"):
+        return out.records
+    if out.status == "unauthorized":
+        raise ProductError("fastmoss_unauthorized", "FastMoss 拒绝了 API Key，请到设置页检查", 502)
+    raise ProductError("fastmoss_failed", f"类目识别失败：{out.message or out.status}", 502)

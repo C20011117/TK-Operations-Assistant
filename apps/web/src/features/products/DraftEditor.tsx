@@ -3,8 +3,10 @@ import { useState } from "react";
 
 import { Button, Card, ErrorText, Field, Input, Select, Textarea } from "@/components/ui";
 import { api, errorMessage, unwrap } from "@/lib/api/client";
-import type { MarketTermIn, ProductDetail, ProductVersion } from "@/lib/api/types";
+import type { MarketTermIn, ProductCategory, ProductDetail, ProductVersion } from "@/lib/api/types";
 import { fromLines, samplePolicyLabels, toLines } from "@/lib/labels";
+
+import { CategoryPicker } from "./CategoryPicker";
 
 type TermRow = MarketTermIn & { enabled: boolean };
 
@@ -46,6 +48,7 @@ export function DraftEditor({ product, draft }: { product: ProductDetail; draft:
     reference_links: toLines(f.reference_links ?? []),
     notes: f.notes ?? "",
   });
+  const [category, setCategory] = useState<ProductCategory | null>(f.category ?? null);
   const [terms, setTerms] = useState<TermRow[] | null>(null);
   const rows = terms ?? (markets.data ? initialTerms(markets.data, draft) : null);
   const currency = new Map(markets.data?.map((m) => [m.market_code, m.settlement_currency]));
@@ -62,6 +65,7 @@ export function DraftEditor({ product, draft }: { product: ProductDetail; draft:
       forbidden_claims: fromLines(facts.forbidden_claims),
       reference_links: fromLines(facts.reference_links),
       notes: facts.notes,
+      category,
     },
     market_terms: (rows ?? [])
       .filter((r) => r.enabled)
@@ -132,6 +136,11 @@ export function DraftEditor({ product, draft }: { product: ProductDetail; draft:
         <div className="md:col-span-2">
           <Field label="产品简介（必填）" hint="一句话说明是什么、解决什么问题">
             <Textarea rows={2} {...t("summary")} />
+          </Field>
+        </div>
+        <div className="md:col-span-2">
+          <Field label="TikTok 商品类目" hint="找人时按这个类目搜索“带过同类商品”的达人，例如摄像头 → 手机与数码 › 摄影摄像 › 监控摄像设备">
+            <CategoryPicker value={category} onChange={setCategory} defaultQuery={product.name} />
           </Field>
         </div>
         <Field label="主要卖点（至少一项）">

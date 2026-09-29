@@ -105,6 +105,72 @@ def _load_snapshot(s, call_id: str) -> list[dict[str, Any]]:
     return json.loads(row.records) if row else []
 
 
+def normalize_result(op, data: Any, validated: BaseModel) -> tuple[list[dict[str, Any]], int | None]:
+    if op.normalize is not None:
+        return op.normalize(data, validated)
+    raw_list, total = cs.extract_list(data)
+    return [cs.normalize_record(r) for r in raw_list], total
+
+
+def _invoke(client: ToolClient, tool: str, args: dict[str, Any]) -> tuple[ToolResult | None, str, str]:
+    """调用一次（含限流重试）。返回 (结果, 状态, 说明)。"""
+    status, message = "failed", ""
+    for attempt in range(RATE_LIMIT_RETRIES + 1):
+        limiter.wait()
+        try:
+            return client.call_tool(tool, args), "ok", ""
+        except FastMossRateLimited as e:
+            status, message = "rate_limited", str(e)
+            if attempt < RATE_LIMIT_RETRIES:
+                time.sleep(RATE_LIMIT_BACKOFF_SECONDS * (attempt + 1))
+        except FastMossInsufficientCredits as e:
+            return None, "insufficient_credits", str(e)
+        except FastMossAuthError as e:
+            return None, "unauthorized", str(e)
+        except httpx.TimeoutException:
+            return None, "unknown", "请求超时，无法确认 FastMoss 是否已执行和扣费"
+        except Exception as e:  # noqa: BLE001  其他错误记录为失败，由调用方决定是否继续
+            return None, "failed", f"{type(e).__name__}: {str(e)[:200]}"
+    return None, status, message
+
+
+def call_direct(op_name: str, params: BaseModel, client: ToolClient | None = None) -> CallOutcome:
+    """不属于任何运行的调用（类目识别、竞品推荐）：不缓存，扣费写入 usage_ledger（run_id 为空）。"""
+    op = OPERATIONS[op_name]
+    validated = op.params_model.model_validate(params.model_dump())
+    owns = client is None
+    c = client or new_client()
+    try:
+        result, status, message = _invoke(c, op.tool, validated.model_dump(exclude_none=True))
+    finally:
+        if owns:
+            c.close()
+    if result is None:
+        return CallOutcome(call_id="", status=status, message=message)
+    records, total = normalize_result(op, result.data, validated)
+    charge = result.charge
+    credits = charge.credit_cost if charge and charge.charged else 0
+    if charge is None and records:
+        credits = op.credit_cost_estimate(validated)
+    if credits:
+        with tx() as s:
+            s.execute(
+                text(
+                    """INSERT INTO usage_ledger (id, run_id, source, operation, credits, created_at)
+                       VALUES (:id, NULL, 'fastmoss', :op, :cr, :n)"""
+                ),
+                {"id": str(uuid.uuid4()), "op": op_name, "cr": credits, "n": utcnow_iso()},
+            )
+    return CallOutcome(
+        call_id="",
+        status="succeeded" if records else "empty",
+        records=records,
+        total=total,
+        credits=credits,
+        remaining_credits=charge.remaining_credits if charge else None,
+    )
+
+
 def call(run_id: str, op_name: str, params: BaseModel, client: ToolClient) -> CallOutcome:
     op = OPERATIONS[op_name]
     validated = op.params_model.model_validate(params.model_dump())
@@ -165,35 +231,12 @@ def call(run_id: str, op_name: str, params: BaseModel, client: ToolClient) -> Ca
                 },
             )
 
-    status, message, result = "failed", "", None
-    for attempt in range(RATE_LIMIT_RETRIES + 1):
-        limiter.wait()
-        try:
-            result = client.call_tool(op.tool, args)
-            status = "ok"
-            break
-        except FastMossRateLimited as e:
-            status, message = "rate_limited", str(e)
-            if attempt < RATE_LIMIT_RETRIES:
-                time.sleep(RATE_LIMIT_BACKOFF_SECONDS * (attempt + 1))
-        except FastMossInsufficientCredits as e:
-            status, message = "insufficient_credits", str(e)
-            break
-        except FastMossAuthError as e:
-            status, message = "unauthorized", str(e)
-            break
-        except httpx.TimeoutException:
-            status, message = "unknown", "请求超时，无法确认 FastMoss 是否已执行和扣费"
-            break
-        except Exception as e:  # noqa: BLE001  其他错误记录为失败，由运行决定是否继续
-            status, message = "failed", f"{type(e).__name__}: {str(e)[:200]}"
-            break
+    result, status, message = _invoke(client, op.tool, args)
 
     out = CallOutcome(call_id=call_id, status=status, message=message)
     fin = utcnow_iso()
     if result is not None:
-        raw_list, total = cs.extract_list(result.data)
-        records = [cs.normalize_record(r) for r in raw_list]
+        records, total = normalize_result(op, result.data, validated)
         charge = result.charge
         charged = charge.charged if charge else None
         credits = charge.credit_cost if charge and charge.charged else 0

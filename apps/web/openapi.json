@@ -514,6 +514,51 @@
         }
       }
     },
+    "/api/v1/products/category-suggestions": {
+      "post": {
+        "tags": [
+          "products"
+        ],
+        "summary": "根据产品名称 / 品类词推荐 TikTok 商品类目（FastMoss，不扣费）",
+        "operationId": "products_category_suggestions_api_v1_products_category_suggestions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategorySuggestionsIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CategorySuggestion"
+                  },
+                  "type": "array",
+                  "title": "Response Products Category Suggestions Api V1 Products Category Suggestions Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/products/{product_id}": {
       "get": {
         "tags": [
@@ -1774,6 +1819,58 @@
           }
         }
       }
+    },
+    "/api/v1/campaign-markets/{cm_id}/competitor-suggestions": {
+      "post": {
+        "tags": [
+          "matching"
+        ],
+        "summary": "按产品类目推荐本站点的同类在售商品作为竞品（FastMoss，每次 1 额度）",
+        "operationId": "competitor_suggestions_api_v1_campaign_markets__cm_id__competitor_suggestions_post",
+        "parameters": [
+          {
+            "name": "cm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cm Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompetitorSuggestionsIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetitorSuggestionsView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2503,6 +2600,315 @@
           "source"
         ],
         "title": "CardPoint"
+      },
+      "CategorySuggestion": {
+        "properties": {
+          "l1_id": {
+            "type": "integer",
+            "title": "L1 Id"
+          },
+          "l2_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "L2 Id"
+          },
+          "l3_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "L3 Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Path"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "matched_query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Query"
+          }
+        },
+        "type": "object",
+        "required": [
+          "l1_id",
+          "l2_id",
+          "l3_id",
+          "name",
+          "path",
+          "score",
+          "matched_query"
+        ],
+        "title": "CategorySuggestion"
+      },
+      "CategorySuggestionsIn": {
+        "properties": {
+          "query": {
+            "items": {
+              "type": "string",
+              "maxLength": 50,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Query",
+            "description": "产品名称或品类词，中英文均可"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "title": "CategorySuggestionsIn"
+      },
+      "Competitor": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Product Id",
+            "description": "TikTok 商品编号或商品链接"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Z]{3}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id"
+        ],
+        "title": "Competitor",
+        "description": "竞品：卖过它的达人会优先进入候选。product_id 可以直接粘贴 TikTok 商品链接。"
+      },
+      "CompetitorSuggestion": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "title": "Product Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "category_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Path"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "price_display": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Display"
+          },
+          "day28_units_sold": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day28 Units Sold"
+          },
+          "day28_gmv": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day28 Gmv"
+          },
+          "linked_creator_count": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Linked Creator Count"
+          },
+          "shop_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shop Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "title",
+          "category_path",
+          "currency",
+          "price_display",
+          "day28_units_sold",
+          "day28_gmv",
+          "linked_creator_count",
+          "shop_name"
+        ],
+        "title": "CompetitorSuggestion"
+      },
+      "CompetitorSuggestionsIn": {
+        "properties": {
+          "keywords": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keywords",
+            "description": "可选：竞品关键词（英文效果更好）"
+          }
+        },
+        "type": "object",
+        "title": "CompetitorSuggestionsIn"
+      },
+      "CompetitorSuggestionsView": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CompetitorSuggestion"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "credits_used": {
+            "type": "integer",
+            "title": "Credits Used",
+            "description": "本次推荐消耗的 FastMoss 额度"
+          },
+          "category_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Path",
+            "description": "按哪个产品类目推荐；为空表示只按关键词"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "credits_used",
+          "category_path"
+        ],
+        "title": "CompetitorSuggestionsView"
       },
       "CreateJobRequest": {
         "properties": {
@@ -3784,6 +4190,53 @@
         ],
         "title": "Metric"
       },
+      "ProductCategory": {
+        "properties": {
+          "l1_id": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "L1 Id"
+          },
+          "l2_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "L2 Id"
+          },
+          "l3_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "L3 Id"
+          },
+          "path": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Path",
+            "description": "中文类目路径，如“手机与数码-摄影摄像-监控摄像设备”"
+          }
+        },
+        "type": "object",
+        "required": [
+          "l1_id",
+          "path"
+        ],
+        "title": "ProductCategory",
+        "description": "TikTok 商品类目（来自 FastMoss 类目识别，用户确认）。按类目找达人时使用最深的一级。"
+      },
       "ProductCreate": {
         "properties": {
           "sku": {
@@ -3964,6 +4417,17 @@
             "maxLength": 4000,
             "title": "Notes",
             "default": ""
+          },
+          "category": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductCategory"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "TikTok 商品类目；用于按类目找达人"
           }
         },
         "type": "object",
@@ -4660,6 +5124,38 @@
             "maxItems": 5,
             "title": "Keywords",
             "description": "搜索关键词（产品、品类、内容主题）"
+          },
+          "use_product_category": {
+            "type": "boolean",
+            "title": "Use Product Category",
+            "description": "按产品的 TikTok 商品类目搜索（产品设置了类目时生效）",
+            "default": true
+          },
+          "category_level": {
+            "type": "string",
+            "enum": [
+              "l3",
+              "l2",
+              "l1"
+            ],
+            "title": "Category Level",
+            "description": "按第几级类目搜索；产品类目没有该级时用更上一级",
+            "default": "l3"
+          },
+          "competitors": {
+            "items": {
+              "$ref": "#/components/schemas/Competitor"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Competitors",
+            "description": "竞品，最多 3 个"
+          },
+          "enrich_competitor_creators": {
+            "type": "boolean",
+            "title": "Enrich Competitor Creators",
+            "description": "用 creator_search 补全竞品达人的近 28 天数据（每人 1 额度，不超过目标名单数）",
+            "default": true
           }
         },
         "type": "object",

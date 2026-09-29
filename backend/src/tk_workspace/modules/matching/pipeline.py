@@ -9,6 +9,7 @@
 """
 
 import json
+import re
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
@@ -18,6 +19,7 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, START, StateGraph
 from sqlalchemy import text
 
+from tk_workspace.integrations.fastmoss import catalog
 from tk_workspace.integrations.fastmoss import creator_search as cs
 from tk_workspace.modules.campaigns.criteria import FIELDS
 from tk_workspace.modules.matching import assess, provider
@@ -27,16 +29,18 @@ from tk_workspace.modules.matching.evaluate import (
     build_observations,
     describe_actual,
     evaluate_rule,
+    relevance_rank,
 )
 from tk_workspace.platform.db.engine import tx
 from tk_workspace.platform.db.types import utcnow_iso
 from tk_workspace.platform.jobs.registry import JobKind, JobRuntime, register
 
-GRAPH_VERSION = "m2-graph-1"
-RANKING_VERSION = "m2-rank-2"
+GRAPH_VERSION = "m2-graph-2"
+RANKING_VERSION = "m2-rank-3"
 MAX_POOL = 200
 MAX_PAGES_PER_QUERY = 20
 MAX_ASSESS = 40
+MAX_ENRICH = 20
 ASSESS_WORKERS = 3
 
 STOP_MESSAGES = {
@@ -153,15 +157,19 @@ def load_context(state: State, config: RunnableConfig) -> State:
     ctx.data = {
         "run": dict(run),
         "criteria": json.loads(cv.criteria),
-        "keywords": json.loads(cv.search).get("keywords", []),
+        "search": json.loads(cv.search),
+        "category": facts.get("category"),
         "price": term.price_amount if price_known else None,
         "price_currency": term.price_currency if term else None,
         "task": {
             "product_name": camp.name,
             "product": {
-                k: facts.get(k)
-                for k in ("summary", "selling_points", "use_scenarios", "forbidden_claims", "category")
-                if facts.get(k)
+                **{
+                    k: facts.get(k)
+                    for k in ("summary", "selling_points", "use_scenarios", "forbidden_claims")
+                    if facts.get(k)
+                },
+                **({"tiktok_category": facts["category"]["path"]} if facts.get("category") else {}),
             },
             "market": {
                 "code": run["market_code"],
@@ -231,7 +239,9 @@ def upsert_candidate(s, run_id: str, rec: dict[str, Any], discovery: dict[str, A
             },
         )
     ev = s.execute(
-        text("SELECT id, discovery FROM candidate_evaluations WHERE run_id=:r AND creator_id=:c"),
+        text(
+            "SELECT id, discovery, observations FROM candidate_evaluations WHERE run_id=:r AND creator_id=:c"
+        ),
         {"r": run_id, "c": creator_id},
     ).first()
     if ev is None:
@@ -254,11 +264,126 @@ def upsert_candidate(s, run_id: str, rec: dict[str, Any], discovery: dict[str, A
         disc = json.loads(ev.discovery)
         if discovery not in disc:
             disc.append(discovery)
+        merged = merge_records(json.loads(ev.observations)["record"], rec)
         s.execute(
-            text("UPDATE candidate_evaluations SET discovery=:d, updated_at=:n WHERE id=:id"),
-            {"d": _j(disc), "n": now, "id": ev.id},
+            text(
+                "UPDATE candidate_evaluations SET discovery=:d, observations=:o, updated_at=:n WHERE id=:id"
+            ),
+            {"d": _j(disc), "o": _j({"record": merged}), "n": now, "id": ev.id},
         )
     return creator_id
+
+
+def _category_filter(category: dict[str, Any] | None, level: str) -> tuple[dict[str, int], str | None]:
+    """按设置的层级取产品类目；产品类目没有该级时用更上一级。返回 (筛选参数, 类目名称)。"""
+    if not category:
+        return {}, None
+    want = {"l1": 1, "l2": 2, "l3": 3}.get(level, 3)
+    for n in range(want, 0, -1):
+        cid = category.get(f"l{n}_id")
+        if cid:
+            parts = [p.strip() for p in re.split(r"[-›>/]", category.get("path") or "") if p.strip()]
+            label = " › ".join(parts[:n]) if len(parts) >= n else (category.get("path") or f"类目 {cid}")
+            return {f"product_category_l{n}_id": int(cid)}, label
+    return {}, None
+
+
+def merge_records(old: dict[str, Any], new: dict[str, Any]) -> dict[str, Any]:
+    """同一达人被多个来源找到时合并：完整记录（creator_search）优先，竞品带货记录和类目依据取并集。"""
+    if old.get("partial") and not new.get("partial"):
+        base, other = dict(new), old
+    else:
+        base, other = dict(old), new
+    sales = {x.get("product_id"): x for x in (old.get("competitor_sales") or []) if x.get("product_id")}
+    for x in new.get("competitor_sales") or []:
+        if x.get("product_id"):
+            sales.setdefault(x["product_id"], x)
+    if sales:
+        base["competitor_sales"] = list(sales.values())
+    base["category_guaranteed"] = old.get("category_guaranteed") or new.get("category_guaranteed")
+    base["filter_guaranteed"] = {
+        **(old.get("filter_guaranteed") or {}),
+        **(new.get("filter_guaranteed") or {}),
+    }
+    base["partial"] = bool(old.get("partial")) and bool(new.get("partial"))
+    for k in ("categories", "nickname", "unique_id", "provider_uid", "region"):
+        if not base.get(k) and other.get(k):
+            base[k] = other[k]
+    return base
+
+
+class _Discovery:
+    """discover 节点的状态与共用步骤：额度检查、调用结果处理、入库。"""
+
+    def __init__(self, ctx: Ctx, run_id: str) -> None:
+        self.ctx, self.run_id = ctx, run_id
+        run = ctx.data["run"]
+        self.region = run["provider_region"]
+        self.cap = run["cost_cap_credits"]
+        self.target = run["target_list_size"]
+        self.pool_target = min(MAX_POOL, max(self.target * 3, 20))
+        self.seen: set[str] = set()
+        self.failures = 0
+        self.stop_reason: str | None = None
+        self.counters: dict[str, int] = {"competitor_creators": 0, "other_region_skipped": 0, "enriched": 0}
+
+    def used(self) -> int:
+        with tx() as s:
+            return s.execute(
+                text("SELECT credits_used FROM matching_runs WHERE id=:id"), {"id": self.run_id}
+            ).scalar()
+
+    def can_spend(self, cost: int) -> bool:
+        if self.cap is not None and self.used() + cost > self.cap:
+            self.stop_reason = "cost_cap_reached"
+            return False
+        return True
+
+    def progress(self, message: str) -> None:
+        _progress(
+            self.ctx,
+            self.run_id,
+            "discover",
+            min(5 + len(self.seen) * 45 // self.pool_target, 50),
+            message,
+            candidates=len(self.seen),
+            credits_used=self.used(),
+            **self.counters,
+        )
+
+    def call(self, op: str, params: Any) -> provider.CallOutcome | None:
+        """调用并处理通用失败；返回 None 表示这次没有可用结果（stop_reason 可能已设置）。"""
+        out = provider.call(self.run_id, op, params, self.ctx.client)
+        if out.status == "unauthorized":
+            raise RunError("fastmoss_unauthorized", "FastMoss 拒绝了 API Key，请到设置页检查")
+        if out.status == "insufficient_credits":
+            self.stop_reason = "insufficient_credits"
+            return None
+        if out.status == "unknown":
+            self.stop_reason = "provider_outcome_unknown"
+            return None
+        if out.status in ("failed", "rate_limited"):
+            self.failures += 1
+            if self.failures >= 2:
+                self.stop_reason = "provider_failed"
+            return None
+        self.failures = 0
+        return out
+
+    def store(
+        self, records: list[dict[str, Any]], discovery: dict[str, Any], extra: dict[str, Any]
+    ) -> list[str]:
+        ids = []
+        now = utcnow_iso()
+        with tx() as s:
+            for pos, rec in enumerate(records):
+                cid = upsert_candidate(
+                    s, self.run_id, {**rec, **extra}, {**discovery, "position": pos + 1}, now
+                )
+                if cid:
+                    self.seen.add(cid)
+                    ids.append(cid)
+        return ids
 
 
 def discover(state: State, config: RunnableConfig) -> State:
@@ -266,94 +391,159 @@ def discover(state: State, config: RunnableConfig) -> State:
     run = ctx.data["run"]
     if run["source"] == "manual_import":
         return {"stop_reason": "manual_import"}
+    search = ctx.data["search"]
+    d = _Discovery(ctx, run_id)
+    if ctx.client is None:
+        ctx.client = provider.new_client()
+
+    # 1) 竞品：卖过同类商品的达人最精准，先取
+    partial: list[tuple[float, str, str]] = []  # (竞品 GMV, 达人 uid, 候选 creator_id)
+    for comp in search.get("competitors") or []:
+        if d.stop_reason or len(d.seen) >= d.pool_target:
+            break
+        if not d.can_spend(3):
+            break
+        d.progress(f"查询竞品达人：{(comp.get('title') or comp['product_id'])[:30]}")
+        params = catalog.ProductCreatorsParams(
+            filter=catalog.ProductCreatorsFilter(product_id=comp["product_id"]),
+            orderby=[catalog.ProductCreatorsOrderBy(field="product_gmv")],
+        )
+        out = d.call("product.creators", params)
+        if out is None:
+            continue
+        keep = []
+        for rec in out.records:
+            if rec.get("region") and rec["region"] != d.region:
+                d.counters["other_region_skipped"] += 1
+                continue
+            sales = [
+                {**x, "title": comp.get("title"), "currency": comp.get("currency")}
+                for x in rec.get("competitor_sales") or []
+            ]
+            keep.append({**rec, "competitor_sales": sales})
+        ids = d.store(
+            keep, {"source": "competitor", "product_id": comp["product_id"], "call_id": out.call_id}, {}
+        )
+        d.counters["competitor_creators"] += len(ids)
+        for rec, cid in zip(keep, ids, strict=False):
+            gmv = float(
+                (rec["competitor_sales"][0].get("product_gmv") if rec["competitor_sales"] else None) or 0
+            )
+            if rec.get("provider_uid"):
+                partial.append((gmv, rec["provider_uid"], cid))
+
+    # 2) 补全竞品达人的近 28 天数据（按竞品 GMV 贡献从高到低，不超过目标名单数）
+    if search.get("enrich_competitor_creators", True) and not d.stop_reason:
+        done: set[str] = set()
+        for _gmv, uid, _cid in sorted(partial, key=lambda x: -x[0]):
+            if d.counters["enriched"] >= min(d.target, MAX_ENRICH) or d.stop_reason:
+                break
+            if uid in done:
+                continue
+            done.add(uid)
+            if not d.can_spend(1):
+                break
+            d.progress("补全竞品达人数据")
+            params = cs.CreatorSearchParams(filter=cs.SearchFilter(region=d.region, uid=uid), page=1)
+            out = d.call("creator.search", params)
+            if out is None:
+                continue
+            match = [r for r in out.records if r.get("provider_uid") == uid] or out.records[:1]
+            if match:
+                d.store(match, {"source": "enrich", "call_id": out.call_id}, {})
+                d.counters["enriched"] += 1
+
+    # 3) 按类目 / 关键词搜索补足候选池
     hard_search = [
         c
         for c in ctx.data["criteria"]
         if c["hardness"] == "hard" and FIELDS[c["field_key"]].support == "search_filter"
     ]
-    flt = cs.compile_filter(run["provider_region"], hard_search)
-    keywords = ctx.data["keywords"] or [None]
-    orderby = None if ctx.data["keywords"] else [cs.OrderBy(field="follower_count")]
-    target = run["target_list_size"]
-    pool_target = min(MAX_POOL, max(target * 3, 20))
-    cap = run["cost_cap_credits"]
+    flt = cs.compile_filter(d.region, hard_search)
+    cat_filter, cat_label = ({}, None)
+    if search.get("use_product_category", True):
+        cat_filter, cat_label = _category_filter(ctx.data["category"], search.get("category_level", "l3"))
+    kw = search.get("keywords") or []
+    # 实测：类目筛选再叠加关键词（关键词匹配达人昵称/简介）几乎总是 0 结果，
+    # 所以类目搜索单独一路（按近 28 天 GMV 排序），关键词搜索排在类目之后、不带类目。
+    base_extra: dict[str, Any] = {}
+    if flt.is_ecommerce_creator is not None:
+        base_extra["filter_guaranteed"] = {"is_ecommerce_creator": flt.is_ecommerce_creator}
+    queries: list[dict[str, Any]] = []
+    if cat_filter:
+        queries.append(
+            {
+                "tier": 0,
+                "keyword": None,
+                "filter": flt.model_copy(update=cat_filter),
+                "orderby": [cs.OrderBy(field="day28_gmv")],
+                "category": cat_label,
+                "extra": {**base_extra, "category_guaranteed": cat_label},
+            }
+        )
+    for k in kw:
+        queries.append(
+            {"tier": 1, "keyword": k, "filter": flt, "orderby": None, "category": None, "extra": base_extra}
+        )
+    if not queries and not search.get("competitors"):
+        # 没有关键词、类目、竞品：按粉丝数泛搜（就绪检查会提示范围过宽）
+        queries.append(
+            {
+                "tier": 1,
+                "keyword": None,
+                "filter": flt,
+                "orderby": [cs.OrderBy(field="follower_count")],
+                "category": None,
+                "extra": base_extra,
+            }
+        )
+    exhausted = dict.fromkeys(range(len(queries)), False)
+    pages = dict.fromkeys(range(len(queries)), 0)
 
-    exhausted = {i: False for i in range(len(keywords))}
-    pages = {i: 0 for i in range(len(keywords))}
-    seen: set[str] = set()
-    failures, stop_reason = 0, None
-    if ctx.client is None:
-        ctx.client = provider.new_client()
-
-    while stop_reason is None:
-        active = [i for i in exhausted if not exhausted[i] and pages[i] < MAX_PAGES_PER_QUERY]
-        if not active:
-            stop_reason = "exhausted"
+    while d.stop_reason is None:
+        open_q = [i for i in exhausted if not exhausted[i] and pages[i] < MAX_PAGES_PER_QUERY]
+        if not open_q:
+            d.stop_reason = "exhausted"
             break
+        tier = min(queries[i]["tier"] for i in open_q)
+        active = [i for i in open_q if queries[i]["tier"] == tier]
         for i in active:
-            if len(seen) >= pool_target:
-                stop_reason = "pool_reached"
+            q = queries[i]
+            if len(d.seen) >= d.pool_target:
+                d.stop_reason = "pool_reached"
                 break
-            with tx() as s:
-                used = s.execute(
-                    text("SELECT credits_used FROM matching_runs WHERE id=:id"), {"id": run_id}
-                ).scalar()
-            if cap is not None and used + 1 > cap:
-                stop_reason = "cost_cap_reached"
+            if not d.can_spend(1):
                 break
             page = pages[i] + 1
-            _progress(
-                ctx,
-                run_id,
-                "discover",
-                min(5 + len(seen) * 45 // pool_target, 50),
-                f"搜索第 {page} 页",
-                candidates=len(seen),
-                credits_used=used,
+            d.progress(f"搜索第 {page} 页")
+            params = cs.CreatorSearchParams(
+                filter=q["filter"], keywords=q["keyword"], orderby=q["orderby"], page=page
             )
-            params = cs.CreatorSearchParams(filter=flt, keywords=keywords[i], orderby=orderby, page=page)
-            out = provider.call(run_id, "creator.search", params, ctx.client)
             pages[i] = page
-            if out.status == "unauthorized":
-                raise RunError("fastmoss_unauthorized", "FastMoss 拒绝了 API Key，请到设置页检查")
-            if out.status == "insufficient_credits":
-                stop_reason = "insufficient_credits"
-                break
-            if out.status == "unknown":
-                stop_reason = "provider_outcome_unknown"
-                break
-            if out.status in ("failed", "rate_limited"):
-                failures += 1
-                if failures >= 2:
-                    stop_reason = "provider_failed"
+            out = d.call("creator.search", params)
+            if out is None:
+                if d.stop_reason:
                     break
                 continue
-            failures = 0
-            now = utcnow_iso()
-            with tx() as s:
-                for pos, rec in enumerate(out.records):
-                    if flt.is_ecommerce_creator is not None:
-                        rec = {**rec, "filter_guaranteed": {"is_ecommerce_creator": flt.is_ecommerce_creator}}
-                    cid = upsert_candidate(
-                        s,
-                        run_id,
-                        rec,
-                        {"keyword": keywords[i], "page": page, "position": pos + 1, "call_id": out.call_id},
-                        now,
-                    )
-                    if cid:
-                        seen.add(cid)
+            d.store(
+                out.records,
+                {"keyword": q["keyword"], "category": q["category"], "page": page, "call_id": out.call_id},
+                q["extra"],
+            )
             if len(out.records) < cs.PAGE_SIZE or (
                 out.total is not None and page * cs.PAGE_SIZE >= out.total
             ):
                 exhausted[i] = True
+    if d.stop_reason == "exhausted" and len(d.seen) >= d.pool_target:
+        d.stop_reason = "pool_reached"
     with tx() as s:
         s.execute(
-            text("UPDATE matching_runs SET stop_reason=:r WHERE id=:id"), {"r": stop_reason, "id": run_id}
+            text("UPDATE matching_runs SET stop_reason=:r WHERE id=:id"), {"r": d.stop_reason, "id": run_id}
         )
-        used = s.execute(text("SELECT credits_used FROM matching_runs WHERE id=:id"), {"id": run_id}).scalar()
-    _progress(ctx, run_id, "discover", 50, "搜索完成", candidates=len(seen), credits_used=used)
-    return {"stop_reason": stop_reason}
+    _progress(
+        ctx, run_id, "discover", 50, "搜索完成", candidates=len(d.seen), credits_used=d.used(), **d.counters
+    )
+    return {"stop_reason": d.stop_reason}
 
 
 def hard_filter(state: State, config: RunnableConfig) -> State:
@@ -370,7 +560,11 @@ def hard_filter(state: State, config: RunnableConfig) -> State:
         for row in rows:
             rec = json.loads(row.observations)["record"]
             obs = build_observations(
-                rec, run["reporting_currency"], ctx.data["price"], ctx.data["price_currency"]
+                rec,
+                run["reporting_currency"],
+                ctx.data["price"],
+                ctx.data["price_currency"],
+                (ctx.data["category"] or {}).get("path"),
             )
             for key, o in obs.items():
                 eid = str(uuid.uuid4())
@@ -455,6 +649,8 @@ _EXTRA_LABELS = {
     "selling_eligibility": "该站点带货资格",
     "profile_text": "账号简介",
     "categories": "类目",
+    "category_match": "带过本产品类目",
+    "competitor_sales": "竞品带货记录",
 }
 
 
@@ -473,6 +669,7 @@ def assess_node(state: State, config: RunnableConfig) -> State:
         rows,
         key=lambda r: (
             GROUP_ORDER[r.group_key],
+            relevance_rank(json.loads(r.observations).get("obs") or {}),
             -(r.soft_score or 0),
             soft_tiebreak(json.loads(r.rule_results)),
             r.id,
@@ -620,6 +817,14 @@ def build_card(row: Any, creator: Any) -> dict[str, Any]:
             unknowns.append({"text": f"{r['label']}：未知 —— {r['reason']}", "tag": tag})
             if r["hardness"] == "hard":
                 questions.append(f"请人工核实“{r['label']}”（要求 {r['expected']}）")
+    cmatch = obs.get("category_match")
+    if cmatch and cmatch["value"] is True:
+        matches.append({"text": f"带过本产品类目：是 —— {cmatch['note']}", "source": "rule", "tag": "类目"})
+    elif cmatch:
+        unknowns.append({"text": f"带过本产品类目：未知 —— {cmatch['note']}", "tag": "类目"})
+    sales = obs.get("competitor_sales")
+    if sales and sales["state"] == "known":
+        matches.append({"text": f"竞品带货：{sales['value']}", "source": "rule", "tag": "竞品"})
     criteria_keys = {r["field_key"] for r in rules}
     for key in ("selling_eligibility", "content_language"):
         if key not in criteria_keys:
@@ -705,10 +910,12 @@ def persist(state: State, config: RunnableConfig) -> State:
         }
         cards = [build_card(r, creators[r.creator_id]) for r in rows]
         tiebreak = {r.id: soft_tiebreak(json.loads(r.rule_results)) for r in rows}
+        relevance = {r.id: relevance_rank(json.loads(r.observations).get("obs") or {}) for r in rows}
         cards.sort(
             key=lambda c: (
                 GROUP_ORDER[c["group"]],
                 FIT_ORDER.get(c["ai"]["product_fit"], 2),
+                relevance[c["evaluation_id"]],
                 -(c["soft_score"] or 0),
                 tiebreak[c["evaluation_id"]],
                 (c["creator"]["unique_id"] or "").lower(),
@@ -735,6 +942,17 @@ def persist(state: State, config: RunnableConfig) -> State:
             for c in cards
         ):
             limitations.append("该站点部分 GMV 数据没有币种，显示为“币种未知”，不换算")
+        partial_left = sum(1 for r in rows if json.loads(r.observations)["record"].get("partial"))
+        if partial_left:
+            limitations.append(
+                f"{partial_left} 位竞品达人没有补全近 28 天数据（受额度上限或补全人数限制），相关条件显示为未知"
+            )
+        cat_used = any(
+            (json.loads(r.observations).get("obs") or {}).get("category_match", {}).get("value") is True
+            for r in rows
+        )
+        if cat_used:
+            limitations.append("“带过本产品类目”表示 FastMoss 记录其带过该类目商品，不代表是其主营方向")
         limitations.append("带货资格默认未知：FastMoss 的地区是达人所在地，不证明具备该站点带货资格")
         versions = {
             "graph": GRAPH_VERSION,

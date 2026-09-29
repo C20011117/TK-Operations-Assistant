@@ -16,6 +16,39 @@ PriceStatus = Literal["known", "unknown"]
 VersionStatus = Literal["draft", "confirmed", "superseded"]
 
 
+class ProductCategory(BaseModel):
+    """TikTok 商品类目（来自 FastMoss 类目识别，用户确认）。按类目找达人时使用最深的一级。"""
+
+    l1_id: int = Field(..., ge=1)
+    l2_id: int | None = Field(None, ge=1)
+    l3_id: int | None = Field(None, ge=1)
+    path: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=300)] = Field(
+        ..., description="中文类目路径，如“手机与数码-摄影摄像-监控摄像设备”"
+    )
+
+    @model_validator(mode="after")
+    def _levels(self):
+        if self.l3_id is not None and self.l2_id is None:
+            raise ValueError("有三级类目时必须有二级类目")
+        return self
+
+
+class CategorySuggestionsIn(BaseModel):
+    query: list[Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]] = (
+        Field(..., min_length=1, max_length=5, description="产品名称或品类词，中英文均可")
+    )
+
+
+class CategorySuggestion(BaseModel):
+    l1_id: int
+    l2_id: int | None
+    l3_id: int | None
+    name: str | None
+    path: str | None
+    score: str | None
+    matched_query: str | None
+
+
 class ProductFacts(BaseModel):
     """规范事实。影响筛选与拍摄包的内容都在这里，确认后不可修改。"""
 
@@ -30,6 +63,7 @@ class ProductFacts(BaseModel):
         default_factory=list, max_length=20, description="参考链接（商品页、参考视频）"
     )
     notes: LongText = ""
+    category: ProductCategory | None = Field(None, description="TikTok 商品类目；用于按类目找达人")
 
 
 class MarketTermIn(BaseModel):
