@@ -122,6 +122,30 @@ def create_job(kind: str, params: dict[str, Any], idempotency_key: str) -> tuple
     return job, True
 
 
+def enqueue_in_tx(s: Session, kind: str, params: dict[str, Any]) -> str:
+    """在调用方的事务里创建内部任务（业务记录与任务同一事务提交）。提交后调用 job_enqueued.set() 唤醒执行器。"""
+    job_kind = get_kind(kind)
+    if job_kind is None:
+        raise UnknownJobKind(kind)
+    job_id = str(uuid4())
+    now = utcnow_iso()
+    s.execute(
+        text(
+            """INSERT INTO jobs (id, kind, queue, status, params, max_attempts, created_at, updated_at)
+               VALUES (:id, :k, :q, 'queued', :p, :m, :now, :now)"""
+        ),
+        {
+            "id": job_id,
+            "k": kind,
+            "q": job_kind.queue,
+            "p": json.dumps(params, ensure_ascii=False),
+            "m": job_kind.max_attempts,
+            "now": now,
+        },
+    )
+    return job_id
+
+
 def get_job(job_id: str) -> JobView | None:
     with tx() as s:
         return _get(s, job_id)

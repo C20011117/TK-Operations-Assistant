@@ -24,3 +24,9 @@ export type Criterion = S["Criterion"];
 export type CriteriaVersion = S["CriteriaVersion"];
 export type FieldSpec = S["FieldSpec"];
 export type Issue = S["Issue"];
+
+export type RunView = S["RunView"];
+export type RecommendationsView = S["RecommendationsView"];
+export type RecommendationCard = S["RecommendationCard"];
+export type CardPoint = S["CardPoint"];
+export type CardNote = S["CardNote"];

@@ -40,3 +40,40 @@ export const fromLines = (text: string) =>
     .split("\n")
     .map((s) => s.trim())
     .filter(Boolean);
+
+export const runStatusLabels = {
+  queued: "排队中",
+  running: "进行中",
+  succeeded: "已完成",
+  partial: "部分完成",
+  failed: "失败",
+  cancelled: "已取消",
+} as const;
+export const stageLabels: Record<string, string> = {
+  load_context: "准备",
+  discover: "FastMoss 搜索",
+  hard_filter: "条件判断",
+  assess: "AI 判断",
+  done: "完成",
+};
+export const groupLabels = { qualified: "合格", needs_verification: "待核实", excluded: "已排除" } as const;
+export const fitLabels = { high: "适配度高", medium: "适配度中", low: "适配度低", unknown: "适配度未知" } as const;
+export const callStatusLabels: Record<string, string> = {
+  pending: "进行中",
+  succeeded: "成功",
+  empty: "无结果（不扣费）",
+  failed: "失败",
+  insufficient_credits: "额度不足",
+  rate_limited: "被限流",
+  unauthorized: "Key 无效",
+  unknown: "结果未知",
+};
+
+/** 大数字缩写：12345 → 1.2 万 */
+export function compact(v: string | null | undefined): string {
+  if (v == null) return "未知";
+  const n = Number(v);
+  if (!Number.isFinite(n)) return v;
+  if (n >= 10000) return `${(n / 10000).toFixed(n >= 100000 ? 0 : 1)} 万`;
+  return n.toLocaleString("zh-CN", { maximumFractionDigits: 2 });
+}

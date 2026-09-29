@@ -1488,10 +1488,354 @@
           }
         }
       }
+    },
+    "/api/v1/campaign-markets/{cm_id}/matching-runs": {
+      "post": {
+        "tags": [
+          "matching"
+        ],
+        "summary": "启动匹配（FastMoss 搜索）；同一 Idempotency-Key 重复提交返回同一次运行",
+        "operationId": "start_api_v1_campaign_markets__cm_id__matching_runs_post",
+        "parameters": [
+          {
+            "name": "cm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cm Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "matching"
+        ],
+        "summary": "匹配运行历史",
+        "operationId": "runs_index_api_v1_campaign_markets__cm_id__matching_runs_get",
+        "parameters": [
+          {
+            "name": "cm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cm Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RunView"
+                  },
+                  "title": "Response Runs Index Api V1 Campaign Markets  Cm Id  Matching Runs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/campaign-markets/{cm_id}/manual-import": {
+      "post": {
+        "tags": [
+          "matching"
+        ],
+        "summary": "人工导入候选名单（CSV），用于没有 FastMoss 数据的站点",
+        "operationId": "manual_import_api_v1_campaign_markets__cm_id__manual_import_post",
+        "parameters": [
+          {
+            "name": "cm_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cm Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualImportIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/matching-runs/{run_id}": {
+      "get": {
+        "tags": [
+          "matching"
+        ],
+        "summary": "匹配运行详情（进度、调用记录、额度）",
+        "operationId": "run_show_api_v1_matching_runs__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/matching-runs/{run_id}/recommendations": {
+      "get": {
+        "tags": [
+          "matching"
+        ],
+        "summary": "推荐卡（冻结的快照）",
+        "operationId": "recommendations_api_v1_matching_runs__run_id__recommendations_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationsView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/matching-runs/{run_id}/cancel": {
+      "post": {
+        "tags": [
+          "matching"
+        ],
+        "summary": "取消匹配",
+        "operationId": "cancel_api_v1_matching_runs__run_id__cancel_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AIView": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "ok",
+              "failed",
+              "skipped",
+              "not_needed"
+            ],
+            "title": "Status"
+          },
+          "product_fit": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "high",
+                  "medium",
+                  "low",
+                  "unknown"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Fit"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "unsupported": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unsupported",
+            "description": "模型给出但没有证据支持的推断"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "product_fit",
+          "summary"
+        ],
+        "title": "AIView"
+      },
       "AppInfo": {
         "properties": {
           "version": {
@@ -2087,6 +2431,79 @@
         ],
         "title": "CampaignUpdate"
       },
+      "CardNote": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tag"
+          },
+          "keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Keys",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "CardNote"
+      },
+      "CardPoint": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "rule",
+              "ai"
+            ],
+            "title": "Source"
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tag"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceRef"
+            },
+            "type": "array",
+            "title": "Evidence",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "source"
+        ],
+        "title": "CardPoint"
+      },
       "CreateJobRequest": {
         "properties": {
           "kind": {
@@ -2103,6 +2520,67 @@
         },
         "type": "object",
         "title": "CreateJobRequest"
+      },
+      "CreatorRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "unique_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unique Id"
+          },
+          "nickname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nickname"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "profile_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "unique_id",
+          "nickname",
+          "region",
+          "profile_url"
+        ],
+        "title": "CreatorRef"
       },
       "CriteriaIn": {
         "properties": {
@@ -2319,6 +2797,40 @@
           "facts"
         ],
         "title": "DraftIn"
+      },
+      "EvidenceRef": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "value"
+        ],
+        "title": "EvidenceRef"
       },
       "ExternalCheck": {
         "properties": {
@@ -2859,6 +3371,27 @@
         ],
         "title": "LLMSettingsView"
       },
+      "ManualImportIn": {
+        "properties": {
+          "csv": {
+            "type": "string",
+            "maxLength": 500000,
+            "title": "Csv",
+            "description": "CSV 文本，第一行为表头"
+          },
+          "filename": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Filename",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "csv"
+        ],
+        "title": "ManualImportIn"
+      },
       "Market": {
         "properties": {
           "market_code": {
@@ -3198,6 +3731,58 @@
           "price_status"
         ],
         "title": "MarketTermIn"
+      },
+      "Metric": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "known",
+              "unknown",
+              "anomaly",
+              "inconsistent"
+            ],
+            "title": "State"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "value",
+          "state"
+        ],
+        "title": "Metric"
       },
       "ProductCreate": {
         "properties": {
@@ -3555,6 +4140,118 @@
         ],
         "title": "ProductVersion"
       },
+      "ProviderCallView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "operation": {
+            "type": "string",
+            "title": "Operation"
+          },
+          "keywords": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keywords"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "credit_cost": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credit Cost"
+          },
+          "result_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result Count"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          },
+          "remaining_credits": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remaining Credits"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "operation",
+          "keywords",
+          "page",
+          "status",
+          "credit_cost",
+          "result_count",
+          "total",
+          "remaining_credits",
+          "error",
+          "created_at"
+        ],
+        "title": "ProviderCallView"
+      },
       "Readiness": {
         "properties": {
           "ready": {
@@ -3584,6 +4281,374 @@
           "warnings"
         ],
         "title": "Readiness"
+      },
+      "RecommendationCard": {
+        "properties": {
+          "evaluation_id": {
+            "type": "string",
+            "title": "Evaluation Id"
+          },
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "group": {
+            "type": "string",
+            "enum": [
+              "qualified",
+              "needs_verification",
+              "excluded"
+            ],
+            "title": "Group"
+          },
+          "hard_status": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "fail",
+              "unknown"
+            ],
+            "title": "Hard Status"
+          },
+          "soft_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Soft Score"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/CreatorRef"
+          },
+          "metrics": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Metric"
+            },
+            "type": "object",
+            "title": "Metrics"
+          },
+          "has_email": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Has Email"
+          },
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/CardPoint"
+            },
+            "type": "array",
+            "title": "Matches"
+          },
+          "mismatches": {
+            "items": {
+              "$ref": "#/components/schemas/CardPoint"
+            },
+            "type": "array",
+            "title": "Mismatches"
+          },
+          "unknowns": {
+            "items": {
+              "$ref": "#/components/schemas/CardNote"
+            },
+            "type": "array",
+            "title": "Unknowns"
+          },
+          "anomalies": {
+            "items": {
+              "$ref": "#/components/schemas/CardNote"
+            },
+            "type": "array",
+            "title": "Anomalies"
+          },
+          "questions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Questions"
+          },
+          "ai": {
+            "$ref": "#/components/schemas/AIView"
+          },
+          "profile_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Text"
+          },
+          "categories": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Categories"
+          }
+        },
+        "type": "object",
+        "required": [
+          "evaluation_id",
+          "rank",
+          "group",
+          "hard_status",
+          "soft_score",
+          "creator",
+          "metrics",
+          "has_email",
+          "matches",
+          "mismatches",
+          "unknowns",
+          "anomalies",
+          "questions",
+          "ai"
+        ],
+        "title": "RecommendationCard"
+      },
+      "RecommendationsView": {
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/RunView"
+          },
+          "snapshot": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SnapshotView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/RecommendationCard"
+            },
+            "type": "array",
+            "title": "Cards"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run",
+          "snapshot",
+          "cards"
+        ],
+        "title": "RecommendationsView"
+      },
+      "RunView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "campaign_market_id": {
+            "type": "string",
+            "title": "Campaign Market Id"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "fastmoss",
+              "manual_import"
+            ],
+            "title": "Source"
+          },
+          "market_code": {
+            "type": "string",
+            "title": "Market Code"
+          },
+          "provider_region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Region",
+            "description": "实际传给 FastMoss 的地区码（英国为 GB）"
+          },
+          "reporting_currency": {
+            "type": "string",
+            "title": "Reporting Currency"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "partial",
+              "failed",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage"
+          },
+          "target_list_size": {
+            "type": "integer",
+            "title": "Target List Size"
+          },
+          "cost_cap_credits": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Cap Credits"
+          },
+          "credits_used": {
+            "type": "integer",
+            "title": "Credits Used"
+          },
+          "llm_input_tokens": {
+            "type": "integer",
+            "title": "Llm Input Tokens"
+          },
+          "llm_output_tokens": {
+            "type": "integer",
+            "title": "Llm Output Tokens"
+          },
+          "counters": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Counters"
+          },
+          "stop_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stop Reason"
+          },
+          "stop_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stop Message"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "criteria_version_no": {
+            "type": "integer",
+            "title": "Criteria Version No"
+          },
+          "product_version_no": {
+            "type": "integer",
+            "title": "Product Version No"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "calls": {
+            "items": {
+              "$ref": "#/components/schemas/ProviderCallView"
+            },
+            "type": "array",
+            "title": "Calls",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "campaign_market_id",
+          "source",
+          "market_code",
+          "provider_region",
+          "reporting_currency",
+          "status",
+          "stage",
+          "target_list_size",
+          "cost_cap_credits",
+          "credits_used",
+          "llm_input_tokens",
+          "llm_output_tokens",
+          "counters",
+          "stop_reason",
+          "stop_message",
+          "error",
+          "criteria_version_no",
+          "product_version_no",
+          "created_at",
+          "started_at",
+          "finished_at"
+        ],
+        "title": "RunView"
       },
       "SearchInput": {
         "properties": {
@@ -3615,6 +4680,46 @@
           "fastmoss"
         ],
         "title": "SettingsView"
+      },
+      "SnapshotView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Counts"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limitations"
+          },
+          "versions": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Versions"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "counts",
+          "limitations",
+          "versions",
+          "created_at"
+        ],
+        "title": "SnapshotView"
       },
       "ValidationError": {
         "properties": {

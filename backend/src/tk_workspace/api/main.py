@@ -14,6 +14,7 @@ from tk_workspace.config import APP_VERSION, Settings, get_settings
 from tk_workspace.modules.campaigns import markets
 from tk_workspace.modules.campaigns import router as campaigns_router
 from tk_workspace.modules.knowledge import router as knowledge_router
+from tk_workspace.modules.matching import router as matching_router
 from tk_workspace.modules.settings import router as settings_router
 
 log = logging.getLogger("tk_workspace")
@@ -66,6 +67,7 @@ def create_app(settings: Settings | None = None, token: str | None = None) -> Fa
     app.include_router(settings_router.router, prefix=api)
     app.include_router(knowledge_router.router, prefix=api)
     app.include_router(campaigns_router.router, prefix=api)
+    app.include_router(matching_router.router, prefix=api)
 
     # 中间件后加的在外层：CORS 在最外层处理预检，其次是令牌校验
     app.add_middleware(LocalAuthMiddleware, token=token or resolve_token(s))

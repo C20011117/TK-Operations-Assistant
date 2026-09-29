@@ -44,6 +44,12 @@ def get_kind(name: str) -> JobKind | None:
     return _REGISTRY.get(name)
 
 
+_loaded = False
+
+
 def _ensure_loaded() -> None:
-    if not _REGISTRY:
+    global _loaded
+    if not _loaded:
+        _loaded = True
+        from tk_workspace.modules.matching import pipeline  # noqa: F401  注册 matching.run
         from tk_workspace.platform.jobs import builtin  # noqa: F401  注册内置任务

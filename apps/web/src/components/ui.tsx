@@ -27,10 +27,15 @@ export function Button({
   );
 }
 
+/** 调用方传了宽度（w-44 等）时不再加 w-full，避免两个宽度类冲突。 */
+function widthOr(className: string): string {
+  return /(^|\s)w-/.test(className) ? "" : "w-full";
+}
+
 export function Input({ className = "", ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
-      className={`w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 ${className}`}
+      className={`${widthOr(className)} rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 ${className}`}
       {...props}
     />
   );
@@ -74,7 +79,7 @@ export function ErrorText({ children }: { children: ReactNode }) {
 export function Select({ className = "", ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
-      className={`w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 disabled:bg-slate-50 ${className}`}
+      className={`${widthOr(className)} rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 disabled:bg-slate-50 ${className}`}
       {...props}
     />
   );
@@ -83,7 +88,7 @@ export function Select({ className = "", ...props }: SelectHTMLAttributes<HTMLSe
 export function Textarea({ className = "", ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
-      className={`w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 ${className}`}
+      className={`${widthOr(className)} rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 ${className}`}
       {...props}
     />
   );

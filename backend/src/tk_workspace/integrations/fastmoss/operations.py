@@ -1,7 +1,7 @@
 """FastMoss 固定操作注册表（ADR-05）：内部操作名 → MCP 工具、参数校验、预计扣费。
 
-模型不能自造工具名、参数或地址；新增能力只能在这里登记。M0 只登记免费的余额查询，
-creator.search 等在 M2 加入。
+模型不能自造工具名、参数或地址；新增能力只能在这里登记。M0 登记免费的余额查询，
+M2 加入 creator.search（每次 1 额度，与条数无关）。
 """
 
 from collections.abc import Callable
@@ -11,6 +11,7 @@ from typing import Any
 from pydantic import BaseModel
 
 from tk_workspace.config import get_settings
+from tk_workspace.integrations.fastmoss.creator_search import CreatorSearchParams
 from tk_workspace.integrations.fastmoss.mcp_client import FastMossMCPClient, ToolResult
 
 
@@ -32,6 +33,12 @@ OPERATIONS: dict[str, ProviderOperation] = {
         tool="credit_usage_summary",
         params_model=NoParams,
         credit_cost_estimate=lambda _p: 0,  # 2026-09-29 实测不扣费
+    ),
+    "creator.search": ProviderOperation(
+        name="creator.search",
+        tool="creator_search",
+        params_model=CreatorSearchParams,
+        credit_cost_estimate=lambda _p: 1,  # 2026-09-29 实测每次 1 额度；空结果不扣
     ),
 }
 

@@ -7,6 +7,8 @@ import { api, errorMessage, unwrap } from "@/lib/api/client";
 import type { CampaignDetail, CampaignMarketView } from "@/lib/api/types";
 import { collabLabels, fmtTime, goalLabels, localNow, money, operatorLabels, samplePolicyLabels } from "@/lib/labels";
 
+import { MatchingPanel } from "@/features/matching/MatchingPanel";
+
 import { CriteriaEditor, type Row, useFieldSpecs } from "./CriteriaEditor";
 
 function useSetCampaign(id: string) {
@@ -63,7 +65,7 @@ function ReadinessCard({ c, cm }: { c: CampaignDetail; cm: CampaignMarketView })
         ))}
       </ul>
       {cm.status === "ready" && (
-        <p className="mt-3 text-sm text-slate-500">任务已确认，M2 上线后可从这里启动找人。修改设置或条件后需要重新确认。</p>
+        <p className="mt-3 text-sm text-slate-500">任务已确认，可以在下方“匹配与推荐”中启动找人。修改设置或条件后需要重新确认。</p>
       )}
       {asking && (
         <div className="mt-4 rounded-md border border-slate-300 bg-slate-50 p-4 text-sm">
@@ -503,6 +505,7 @@ export function CampaignDetailPage() {
         }
       />
       <ReadinessCard c={c} cm={cm} />
+      <MatchingPanel c={c} cm={cm} />
       <InfoCard key={c.updated_at} c={c} cm={cm} />
       <SettingsCard key={`s-${cm.target_list_size}-${cm.budget_min}-${cm.budget_max}-${cm.cost_cap_credits}`} c={c} cm={cm} />
       <CriteriaCard key={criteriaKey} c={c} cm={cm} />

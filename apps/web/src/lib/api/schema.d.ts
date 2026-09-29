@@ -488,10 +488,113 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/campaign-markets/{cm_id}/matching-runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 匹配运行历史 */
+        get: operations["runs_index_api_v1_campaign_markets__cm_id__matching_runs_get"];
+        put?: never;
+        /** 启动匹配（FastMoss 搜索）；同一 Idempotency-Key 重复提交返回同一次运行 */
+        post: operations["start_api_v1_campaign_markets__cm_id__matching_runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign-markets/{cm_id}/manual-import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 人工导入候选名单（CSV），用于没有 FastMoss 数据的站点 */
+        post: operations["manual_import_api_v1_campaign_markets__cm_id__manual_import_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/matching-runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 匹配运行详情（进度、调用记录、额度） */
+        get: operations["run_show_api_v1_matching_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/matching-runs/{run_id}/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 推荐卡（冻结的快照） */
+        get: operations["recommendations_api_v1_matching_runs__run_id__recommendations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/matching-runs/{run_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 取消匹配 */
+        post: operations["cancel_api_v1_matching_runs__run_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AIView */
+        AIView: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "ok" | "failed" | "skipped" | "not_needed";
+            /** Product Fit */
+            product_fit: ("high" | "medium" | "low" | "unknown") | null;
+            /** Summary */
+            summary: string | null;
+            /**
+             * Unsupported
+             * @description 模型给出但没有证据支持的推断
+             */
+            unsupported?: string[];
+        };
         /** AppInfo */
         AppInfo: {
             /** Version */
@@ -684,6 +787,35 @@ export interface components {
              */
             notes: string;
         };
+        /** CardNote */
+        CardNote: {
+            /** Text */
+            text: string;
+            /** Tag */
+            tag?: string | null;
+            /**
+             * Keys
+             * @default []
+             */
+            keys: string[];
+        };
+        /** CardPoint */
+        CardPoint: {
+            /** Text */
+            text: string;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "rule" | "ai";
+            /** Tag */
+            tag?: string | null;
+            /**
+             * Evidence
+             * @default []
+             */
+            evidence: components["schemas"]["EvidenceRef"][];
+        };
         /** CreateJobRequest */
         CreateJobRequest: {
             /**
@@ -696,6 +828,19 @@ export interface components {
             params?: {
                 [key: string]: unknown;
             };
+        };
+        /** CreatorRef */
+        CreatorRef: {
+            /** Id */
+            id: string;
+            /** Unique Id */
+            unique_id: string | null;
+            /** Nickname */
+            nickname: string | null;
+            /** Region */
+            region: string | null;
+            /** Profile Url */
+            profile_url: string | null;
         };
         /** CriteriaIn */
         CriteriaIn: {
@@ -784,6 +929,17 @@ export interface components {
             facts: components["schemas"]["ProductFacts"];
             /** Market Terms */
             market_terms?: components["schemas"]["MarketTermIn"][];
+        };
+        /** EvidenceRef */
+        EvidenceRef: {
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /** Value */
+            value: string;
+            /** State */
+            state?: string | null;
         };
         /** ExternalCheck */
         ExternalCheck: {
@@ -979,6 +1135,19 @@ export interface components {
             /** Configured */
             configured: boolean;
         };
+        /** ManualImportIn */
+        ManualImportIn: {
+            /**
+             * Csv
+             * @description CSV 文本，第一行为表头
+             */
+            csv: string;
+            /**
+             * Filename
+             * @default
+             */
+            filename: string;
+        };
         /** Market */
         Market: {
             /** Market Code */
@@ -1094,6 +1263,25 @@ export interface components {
              * @default
              */
             notes: string;
+        };
+        /** Metric */
+        Metric: {
+            /** Label */
+            label: string;
+            /** Value */
+            value: string | null;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "known" | "unknown" | "anomaly" | "inconsistent";
+            /** Currency */
+            currency?: string | null;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
         };
         /** ProductCreate */
         ProductCreate: {
@@ -1236,6 +1424,31 @@ export interface components {
             /** Confirmed At */
             confirmed_at: string | null;
         };
+        /** ProviderCallView */
+        ProviderCallView: {
+            /** Id */
+            id: string;
+            /** Operation */
+            operation: string;
+            /** Keywords */
+            keywords: string | null;
+            /** Page */
+            page: number | null;
+            /** Status */
+            status: string;
+            /** Credit Cost */
+            credit_cost: number | null;
+            /** Result Count */
+            result_count: number | null;
+            /** Total */
+            total: number | null;
+            /** Remaining Credits */
+            remaining_credits: number | null;
+            /** Error */
+            error: string | null;
+            /** Created At */
+            created_at: string;
+        };
         /** Readiness */
         Readiness: {
             /**
@@ -1247,6 +1460,119 @@ export interface components {
             blockers: components["schemas"]["Issue"][];
             /** Warnings */
             warnings: components["schemas"]["Issue"][];
+        };
+        /** RecommendationCard */
+        RecommendationCard: {
+            /** Evaluation Id */
+            evaluation_id: string;
+            /** Rank */
+            rank: number;
+            /**
+             * Group
+             * @enum {string}
+             */
+            group: "qualified" | "needs_verification" | "excluded";
+            /**
+             * Hard Status
+             * @enum {string}
+             */
+            hard_status: "pass" | "fail" | "unknown";
+            /** Soft Score */
+            soft_score: number | null;
+            creator: components["schemas"]["CreatorRef"];
+            /** Metrics */
+            metrics: {
+                [key: string]: components["schemas"]["Metric"];
+            };
+            /** Has Email */
+            has_email: boolean | null;
+            /** Matches */
+            matches: components["schemas"]["CardPoint"][];
+            /** Mismatches */
+            mismatches: components["schemas"]["CardPoint"][];
+            /** Unknowns */
+            unknowns: components["schemas"]["CardNote"][];
+            /** Anomalies */
+            anomalies: components["schemas"]["CardNote"][];
+            /** Questions */
+            questions: string[];
+            ai: components["schemas"]["AIView"];
+            /** Profile Text */
+            profile_text?: string | null;
+            /** Categories */
+            categories?: string | null;
+        };
+        /** RecommendationsView */
+        RecommendationsView: {
+            run: components["schemas"]["RunView"];
+            snapshot: components["schemas"]["SnapshotView"] | null;
+            /** Cards */
+            cards: components["schemas"]["RecommendationCard"][];
+        };
+        /** RunView */
+        RunView: {
+            /** Id */
+            id: string;
+            /** Campaign Market Id */
+            campaign_market_id: string;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "fastmoss" | "manual_import";
+            /** Market Code */
+            market_code: string;
+            /**
+             * Provider Region
+             * @description 实际传给 FastMoss 的地区码（英国为 GB）
+             */
+            provider_region: string | null;
+            /** Reporting Currency */
+            reporting_currency: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "succeeded" | "partial" | "failed" | "cancelled";
+            /** Stage */
+            stage: string | null;
+            /** Target List Size */
+            target_list_size: number;
+            /** Cost Cap Credits */
+            cost_cap_credits: number | null;
+            /** Credits Used */
+            credits_used: number;
+            /** Llm Input Tokens */
+            llm_input_tokens: number;
+            /** Llm Output Tokens */
+            llm_output_tokens: number;
+            /** Counters */
+            counters: {
+                [key: string]: unknown;
+            };
+            /** Stop Reason */
+            stop_reason: string | null;
+            /** Stop Message */
+            stop_message: string | null;
+            /** Error */
+            error: {
+                [key: string]: unknown;
+            } | null;
+            /** Criteria Version No */
+            criteria_version_no: number;
+            /** Product Version No */
+            product_version_no: number;
+            /** Created At */
+            created_at: string;
+            /** Started At */
+            started_at: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /**
+             * Calls
+             * @default []
+             */
+            calls: components["schemas"]["ProviderCallView"][];
         };
         /** SearchInput */
         SearchInput: {
@@ -1260,6 +1586,23 @@ export interface components {
         SettingsView: {
             llm: components["schemas"]["LLMSettingsView"];
             fastmoss: components["schemas"]["FastMossSettingsView"];
+        };
+        /** SnapshotView */
+        SnapshotView: {
+            /** Id */
+            id: string;
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+            /** Limitations */
+            limitations: string[];
+            /** Versions */
+            versions: {
+                [key: string]: unknown;
+            };
+            /** Created At */
+            created_at: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -2373,6 +2716,200 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    runs_index_api_v1_campaign_markets__cm_id__matching_runs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_api_v1_campaign_markets__cm_id__matching_runs_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path: {
+                cm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    manual_import_api_v1_campaign_markets__cm_id__manual_import_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path: {
+                cm_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManualImportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    run_show_api_v1_matching_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recommendations_api_v1_matching_runs__run_id__recommendations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecommendationsView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_api_v1_matching_runs__run_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
                 };
             };
             /** @description Validation Error */
