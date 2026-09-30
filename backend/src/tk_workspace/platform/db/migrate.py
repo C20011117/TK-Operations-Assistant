@@ -1,24 +1,27 @@
 """启动时迁移：先备份，再升级；失败则还原备份，不带着半升级的数据库运行。"""
 
 import logging
+import re
 import shutil
 import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
-
-from alembic import command
-from alembic.config import Config
-from alembic.runtime.migration import MigrationContext
-from alembic.script import ScriptDirectory
-from sqlalchemy import create_engine
+from typing import TYPE_CHECKING
 
 from tk_workspace.config import Settings, bundle_root, get_settings
+
+if TYPE_CHECKING:
+    from alembic.config import Config
+
+# Alembic 及其依赖加载较慢（约 0.3 秒），只在确实需要升级时才导入。
 
 log = logging.getLogger(__name__)
 KEEP_BACKUPS = 7
 
 
-def alembic_config(settings: Settings | None = None) -> Config:
+def alembic_config(settings: Settings | None = None) -> "Config":
+    from alembic.config import Config
+
     s = settings or get_settings()
     cfg = Config()
     cfg.set_main_option("script_location", str(bundle_root() / "migrations"))
@@ -51,7 +54,51 @@ def _prune(folder: Path) -> None:
         old.unlink(missing_ok=True)
 
 
-def _current_and_head(cfg: Config, settings: Settings) -> tuple[str | None, str | None]:
+_REV_RE = re.compile(r"^revision\s*=\s*[\"']([^\"']+)[\"']", re.M)
+_DOWN_RE = re.compile(r"^down_revision\s*=\s*(?:None|[\"']([^\"']+)[\"'])", re.M)
+
+
+def _scan_head() -> str | None:
+    """不加载 Alembic，直接从迁移脚本文本找出唯一的最新版本；无法确定时返回 None。"""
+    folder = bundle_root() / "migrations" / "versions"
+    revs: set[str] = set()
+    downs: set[str] = set()
+    for f in folder.glob("*.py"):
+        text = f.read_text(encoding="utf-8")
+        rev, down = _REV_RE.search(text), _DOWN_RE.search(text)
+        if not rev or not down:
+            return None
+        revs.add(rev.group(1))
+        if down.group(1):
+            downs.add(down.group(1))
+    heads = revs - downs
+    return next(iter(heads)) if len(heads) == 1 else None
+
+
+def _db_revision(settings: Settings) -> str | None:
+    con = sqlite3.connect(settings.db_path)
+    try:
+        row = con.execute("SELECT version_num FROM alembic_version").fetchone()
+    except sqlite3.Error:
+        return None
+    finally:
+        con.close()
+    return row[0] if row else None
+
+
+def is_up_to_date(settings: Settings) -> bool:
+    """快速判断：数据库已存在且版本等于最新迁移。任何不确定都返回 False，交给 Alembic 处理。"""
+    if not settings.db_path.exists():
+        return False
+    head = _scan_head()
+    return head is not None and _db_revision(settings) == head
+
+
+def _current_and_head(cfg: "Config", settings: Settings) -> tuple[str | None, str | None]:
+    from alembic.runtime.migration import MigrationContext
+    from alembic.script import ScriptDirectory
+    from sqlalchemy import create_engine
+
     head = ScriptDirectory.from_config(cfg).get_current_head()
     if not settings.db_path.exists():
         return None, head
@@ -67,6 +114,10 @@ def _current_and_head(cfg: Config, settings: Settings) -> tuple[str | None, str 
 def upgrade_to_head(settings: Settings | None = None) -> str:
     s = settings or get_settings()
     s.ensure_dirs()
+    if is_up_to_date(s):
+        return "up_to_date"
+    from alembic import command
+
     cfg = alembic_config(s)
     current, head = _current_and_head(cfg, s)
     if current == head:

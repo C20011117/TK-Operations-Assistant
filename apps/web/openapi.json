@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "TK 达人工作台（桌面版）本机接口",
-    "version": "0.4.0"
+    "version": "0.4.1"
   },
   "paths": {
     "/api/v1/system/health": {

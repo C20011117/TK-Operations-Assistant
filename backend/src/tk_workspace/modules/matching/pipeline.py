@@ -8,15 +8,16 @@
 - 应用中途被关闭后，任务执行器重新排队，本流程从头再跑一遍，已完成的调用不会重复发出。
 """
 
+from __future__ import annotations
+
+import functools
 import json
 import re
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from typing import Any, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict
 
-from langchain_core.runnables import RunnableConfig
-from langgraph.graph import END, START, StateGraph
 from sqlalchemy import text
 
 from tk_workspace.integrations.fastmoss import catalog
@@ -34,6 +35,11 @@ from tk_workspace.modules.matching.evaluate import (
 from tk_workspace.platform.db.engine import tx
 from tk_workspace.platform.db.types import utcnow_iso
 from tk_workspace.platform.jobs.registry import JobKind, JobRuntime, register
+
+if TYPE_CHECKING:
+    from langchain_core.runnables import RunnableConfig
+
+# LangGraph / LangChain 加载约 1.2 秒，只在第一次真正运行匹配时才导入（见 get_graph），不拖慢应用启动。
 
 GRAPH_VERSION = "m2-graph-2"
 RANKING_VERSION = "m2-rank-3"
@@ -1015,7 +1021,10 @@ def persist(state: State, config: RunnableConfig) -> State:
     return {}
 
 
-def _build_graph():
+@functools.cache
+def get_graph():  # noqa: ANN201
+    from langgraph.graph import END, START, StateGraph
+
     g = StateGraph(State)
     g.add_node("load_context", load_context)
     g.add_node("discover", discover)
@@ -1030,8 +1039,6 @@ def _build_graph():
     g.add_edge("persist", END)
     return g.compile()
 
-
-GRAPH = _build_graph()
 
 
 def _finish(run_id: str, status: str, error: dict[str, str] | None = None) -> None:
@@ -1050,7 +1057,7 @@ def run_matching(rt: JobRuntime | None, params: dict[str, Any]) -> dict[str, Any
     run_id = params["run_id"]
     ctx = Ctx(rt=rt)
     try:
-        GRAPH.invoke({"run_id": run_id}, config={"configurable": {"ctx": ctx}})
+        get_graph().invoke({"run_id": run_id}, config={"configurable": {"ctx": ctx}})
     except Cancelled:
         _finish(run_id, "cancelled")
         return {"run_id": run_id, "status": "cancelled"}

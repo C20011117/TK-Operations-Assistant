@@ -4,6 +4,8 @@ import { NavLink, Outlet } from "react-router";
 import { useDueFollowUps } from "@/features/collaborations/followUp";
 import { api } from "@/lib/api/client";
 
+import { BackendGate } from "./BackendGate";
+
 const nav = [
   { to: "/", label: "我的工作台", end: true },
   { to: "/products", label: "产品档案", end: false },
@@ -53,7 +55,10 @@ export function AppLayout() {
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-6 py-8">
-        <Outlet />
+        {/* 导航和页面框架立即显示；只有内容区等待后台服务就绪 */}
+        <BackendGate>
+          <Outlet />
+        </BackendGate>
       </main>
     </div>
   );
