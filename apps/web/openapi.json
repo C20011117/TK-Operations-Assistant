@@ -2966,6 +2966,665 @@
           }
         }
       }
+    },
+    "/api/v1/collaborations/{collab_id}/production": {
+      "get": {
+        "tags": [
+          "production"
+        ],
+        "summary": "拍摄包版本与各轮视频（合作详情页的“拍摄与视频”）",
+        "operationId": "production_api_v1_collaborations__collab_id__production_get",
+        "parameters": [
+          {
+            "name": "collab_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Collab Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/collaborations/{collab_id}/brief-versions/generate": {
+      "post": {
+        "tags": [
+          "production"
+        ],
+        "summary": "AI 生成拍摄包新版本（目标语言 + 中文对照）；不含收件信息",
+        "operationId": "brief_generate_api_v1_collaborations__collab_id__brief_versions_generate_post",
+        "parameters": [
+          {
+            "name": "collab_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Collab Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BriefGenerateIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BriefVersionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/collaborations/{collab_id}/brief-versions": {
+      "post": {
+        "tags": [
+          "production"
+        ],
+        "summary": "手动修改拍摄包：以某个版本为基础保存为新版本（旧版本不变）",
+        "operationId": "brief_save_api_v1_collaborations__collab_id__brief_versions_post",
+        "parameters": [
+          {
+            "name": "collab_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Collab Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BriefSaveIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BriefVersionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/collaborations/{collab_id}/brief/confirm": {
+      "post": {
+        "tags": [
+          "production"
+        ],
+        "summary": "确认拍摄包：写入当前轮次（没有则开始新一轮），本轮拍摄包从此锁定",
+        "operationId": "brief_confirm_api_v1_collaborations__collab_id__brief_confirm_post",
+        "parameters": [
+          {
+            "name": "collab_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Collab Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmBriefIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoundView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/collaborations/{collab_id}/rounds": {
+      "post": {
+        "tags": [
+          "production"
+        ],
+        "summary": "开始新一轮拍摄（1 轮 = 1 条新视频）；已有未确认拍摄包的轮次时返回它",
+        "operationId": "round_start_api_v1_collaborations__collab_id__rounds_post",
+        "parameters": [
+          {
+            "name": "collab_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Collab Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoundIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoundView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rounds/{round_id}": {
+      "get": {
+        "tags": [
+          "production"
+        ],
+        "summary": "某一轮的拍摄包与视频版本",
+        "operationId": "round_get_api_v1_rounds__round_id__get",
+        "parameters": [
+          {
+            "name": "round_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Round Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoundView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rounds/{round_id}/cancel": {
+      "post": {
+        "tags": [
+          "production"
+        ],
+        "summary": "取消这一轮（不计数）",
+        "operationId": "round_cancel_api_v1_rounds__round_id__cancel_post",
+        "parameters": [
+          {
+            "name": "round_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Round Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoundView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rounds/{round_id}/videos": {
+      "post": {
+        "tags": [
+          "production"
+        ],
+        "summary": "上传视频（请求体就是文件本身）；同一文件重复上传返回已有版本",
+        "operationId": "video_upload_api_v1_rounds__round_id__videos_post",
+        "parameters": [
+          {
+            "name": "round_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Round Id"
+            }
+          },
+          {
+            "name": "note",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 500,
+              "default": "",
+              "title": "Note"
+            }
+          },
+          {
+            "name": "X-Filename",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 1000,
+              "title": "X-Filename"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoVersionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "video/mp4": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "video/quicktime": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "video/webm": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "video/x-m4v": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/video-versions/{vid}": {
+      "get": {
+        "tags": [
+          "production"
+        ],
+        "summary": "视频版本（含反馈与审核结论）",
+        "operationId": "video_get_api_v1_video_versions__vid__get",
+        "parameters": [
+          {
+            "name": "vid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Vid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoVersionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/video-versions/{vid}/feedback": {
+      "post": {
+        "tags": [
+          "production"
+        ],
+        "summary": "添加时间码反馈（审核结论提交前）",
+        "operationId": "feedback_add_api_v1_video_versions__vid__feedback_post",
+        "parameters": [
+          {
+            "name": "vid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Vid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/feedback-items/{fid}": {
+      "delete": {
+        "tags": [
+          "production"
+        ],
+        "summary": "删除还没提交的反馈",
+        "operationId": "feedback_delete_api_v1_feedback_items__fid__delete",
+        "parameters": [
+          {
+            "name": "fid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Fid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/video-versions/{vid}/feedback-message": {
+      "post": {
+        "tags": [
+          "production"
+        ],
+        "summary": "把时间码反馈写成发给达人的消息（目标语言 + 中文对照）；只生成，不代发",
+        "operationId": "feedback_message_api_v1_video_versions__vid__feedback_message_post",
+        "parameters": [
+          {
+            "name": "vid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Vid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackMessageIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackMessageView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/video-versions/{vid}/review": {
+      "post": {
+        "tags": [
+          "production"
+        ],
+        "summary": "审核结论：要求返修（至少 1 条反馈）或验收通过（本轮计 1 条）",
+        "operationId": "video_review_api_v1_video_versions__vid__review_post",
+        "parameters": [
+          {
+            "name": "vid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Vid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoundView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3141,6 +3800,172 @@
           "data_dir"
         ],
         "title": "AppInfo"
+      },
+      "BriefGenerateIn": {
+        "properties": {
+          "language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language",
+            "description": "目标语言代码；为空时用站点的常见语言"
+          },
+          "video_length_s": {
+            "type": "integer",
+            "maximum": 180.0,
+            "minimum": 10.0,
+            "title": "Video Length S",
+            "description": "建议视频时长（秒）",
+            "default": 30
+          },
+          "extra": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Extra",
+            "description": "BD 想补充的要求",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "BriefGenerateIn"
+      },
+      "BriefSaveIn": {
+        "properties": {
+          "based_on_version_id": {
+            "type": "string",
+            "title": "Based On Version Id"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 12000,
+            "minLength": 1,
+            "title": "Body"
+          },
+          "body_zh": {
+            "type": "string",
+            "maxLength": 12000,
+            "title": "Body Zh",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "based_on_version_id",
+          "title",
+          "body"
+        ],
+        "title": "BriefSaveIn",
+        "description": "手动修改：以某个版本为基础保存为新版本。"
+      },
+      "BriefVersionView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "version_no": {
+            "type": "integer",
+            "title": "Version No"
+          },
+          "content_language": {
+            "type": "string",
+            "title": "Content Language"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "body_zh": {
+            "type": "string",
+            "title": "Body Zh"
+          },
+          "cautions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cautions"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "ai",
+              "manual"
+            ],
+            "title": "Source"
+          },
+          "based_on_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Based On Version Id"
+          },
+          "product_version_id": {
+            "type": "string",
+            "title": "Product Version Id"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "locked_round_nos": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Locked Round Nos",
+            "description": "锁定了这个版本的轮次"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "version_no",
+          "content_language",
+          "title",
+          "body",
+          "body_zh",
+          "cautions",
+          "source",
+          "based_on_version_id",
+          "product_version_id",
+          "model",
+          "locked_round_nos",
+          "created_at"
+        ],
+        "title": "BriefVersionView"
       },
       "CampaignCreate": {
         "properties": {
@@ -4082,6 +4907,17 @@
             ],
             "description": "跟进提醒；已关闭 / 已完成的合作为空"
           },
+          "production": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductionStage"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "拍摄阶段（最近一轮，不含已取消的轮次）"
+          },
           "shipment_status": {
             "anyOf": [
               {
@@ -4297,6 +5133,17 @@
               }
             ],
             "description": "跟进提醒；已关闭 / 已完成的合作为空"
+          },
+          "production": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductionStage"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "拍摄阶段（最近一轮，不含已取消的轮次）"
           },
           "shipment_status": {
             "anyOf": [
@@ -4558,6 +5405,31 @@
           "category_path"
         ],
         "title": "CompetitorSuggestionsView"
+      },
+      "ConfirmBriefIn": {
+        "properties": {
+          "brief_version_id": {
+            "type": "string",
+            "title": "Brief Version Id"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision",
+            "description": "轮次的 revision，用于防止并发修改"
+          }
+        },
+        "type": "object",
+        "required": [
+          "brief_version_id"
+        ],
+        "title": "ConfirmBriefIn"
       },
       "ConfirmIn": {
         "properties": {
@@ -5401,6 +6273,166 @@
           "configured"
         ],
         "title": "FastMossSettingsView"
+      },
+      "FeedbackIn": {
+        "properties": {
+          "timecode_ms": {
+            "type": "integer",
+            "maximum": 21600000.0,
+            "minimum": 0.0,
+            "title": "Timecode Ms"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "script",
+              "visual",
+              "audio",
+              "product",
+              "compliance",
+              "other"
+            ],
+            "title": "Category",
+            "default": "other"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "must",
+              "should"
+            ],
+            "title": "Severity",
+            "default": "must"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "timecode_ms",
+          "body"
+        ],
+        "title": "FeedbackIn"
+      },
+      "FeedbackMessageIn": {
+        "properties": {
+          "language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "extra": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Extra",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "FeedbackMessageIn"
+      },
+      "FeedbackMessageView": {
+        "properties": {
+          "language": {
+            "type": "string",
+            "title": "Language"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "message_zh": {
+            "type": "string",
+            "title": "Message Zh"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "language",
+          "message",
+          "message_zh",
+          "warnings"
+        ],
+        "title": "FeedbackMessageView"
+      },
+      "FeedbackView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "video_version_id": {
+            "type": "string",
+            "title": "Video Version Id"
+          },
+          "timecode_ms": {
+            "type": "integer",
+            "title": "Timecode Ms"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "script",
+              "visual",
+              "audio",
+              "product",
+              "compliance",
+              "other"
+            ],
+            "title": "Category"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "must",
+              "should"
+            ],
+            "title": "Severity"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "submitted": {
+            "type": "boolean",
+            "title": "Submitted",
+            "description": "已随审核结论提交，不能再修改"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "video_version_id",
+          "timecode_ms",
+          "category",
+          "severity",
+          "body",
+          "submitted",
+          "created_at"
+        ],
+        "title": "FeedbackView"
       },
       "FieldOption": {
         "properties": {
@@ -6895,6 +7927,156 @@
         ],
         "title": "ProductVersion"
       },
+      "ProductionStage": {
+        "properties": {
+          "round_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Round Id"
+          },
+          "round_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Round No"
+          },
+          "round_status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "briefing",
+                  "awaiting_video",
+                  "in_review",
+                  "revision_requested",
+                  "accepted",
+                  "cancelled"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Round Status"
+          },
+          "accepted_videos": {
+            "type": "integer",
+            "title": "Accepted Videos"
+          },
+          "last_activity_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Activity At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "round_id",
+          "round_no",
+          "round_status",
+          "accepted_videos",
+          "last_activity_at"
+        ],
+        "title": "ProductionStage",
+        "description": "给合作列表 / 工作台用的拍摄阶段摘要。"
+      },
+      "ProductionView": {
+        "properties": {
+          "collaboration_id": {
+            "type": "string",
+            "title": "Collaboration Id"
+          },
+          "content_language": {
+            "type": "string",
+            "title": "Content Language",
+            "description": "站点默认内容语言"
+          },
+          "content_languages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Content Languages"
+          },
+          "brief_versions": {
+            "items": {
+              "$ref": "#/components/schemas/BriefVersionView"
+            },
+            "type": "array",
+            "title": "Brief Versions",
+            "description": "新到旧"
+          },
+          "rounds": {
+            "items": {
+              "$ref": "#/components/schemas/RoundView"
+            },
+            "type": "array",
+            "title": "Rounds",
+            "description": "新到旧"
+          },
+          "accepted_videos": {
+            "type": "integer",
+            "title": "Accepted Videos"
+          },
+          "agreed_video_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreed Video Count"
+          },
+          "can_start_round": {
+            "type": "boolean",
+            "title": "Can Start Round"
+          },
+          "start_round_blocker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Round Blocker"
+          }
+        },
+        "type": "object",
+        "required": [
+          "collaboration_id",
+          "content_language",
+          "content_languages",
+          "brief_versions",
+          "rounds",
+          "accepted_videos",
+          "agreed_video_count",
+          "can_start_round",
+          "start_round_blocker"
+        ],
+        "title": "ProductionView",
+        "description": "合作详情页的“拍摄与视频”卡片。"
+      },
       "ProviderCallView": {
         "properties": {
           "id": {
@@ -7321,6 +8503,240 @@
           "cards"
         ],
         "title": "RecommendationsView"
+      },
+      "ReviewIn": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "changes_requested",
+              "accepted"
+            ],
+            "title": "Decision"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Summary",
+            "default": ""
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 6000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message",
+            "description": "发给达人的反馈消息（目标语言）"
+          },
+          "message_language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message Language"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision"
+        ],
+        "title": "ReviewIn"
+      },
+      "ReviewView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "changes_requested",
+              "accepted"
+            ],
+            "title": "Decision"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "message_language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message Language"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "decision",
+          "summary",
+          "message",
+          "message_language",
+          "created_at"
+        ],
+        "title": "ReviewView"
+      },
+      "RoundIn": {
+        "properties": {
+          "note": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "RoundIn"
+      },
+      "RoundView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "collaboration_id": {
+            "type": "string",
+            "title": "Collaboration Id"
+          },
+          "round_no": {
+            "type": "integer",
+            "title": "Round No"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "briefing",
+              "awaiting_video",
+              "in_review",
+              "revision_requested",
+              "accepted",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "brief_version": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BriefVersionView"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "本轮锁定的拍摄包版本"
+          },
+          "brief_confirmed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brief Confirmed At"
+          },
+          "videos": {
+            "items": {
+              "$ref": "#/components/schemas/VideoVersionView"
+            },
+            "type": "array",
+            "title": "Videos"
+          },
+          "accepted_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted Version Id"
+          },
+          "accepted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted At"
+          },
+          "counted": {
+            "type": "boolean",
+            "title": "Counted",
+            "description": "本轮已验收，计 1 条新视频"
+          },
+          "can_upload": {
+            "type": "boolean",
+            "title": "Can Upload"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "collaboration_id",
+          "round_no",
+          "status",
+          "brief_version",
+          "brief_confirmed_at",
+          "videos",
+          "accepted_version_id",
+          "accepted_at",
+          "counted",
+          "can_upload",
+          "revision",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "RoundView"
       },
       "RunView": {
         "properties": {
@@ -8105,7 +9521,8 @@
             "enum": [
               "contacting",
               "negotiating",
-              "closed"
+              "closed",
+              "completed"
             ],
             "title": "To"
           },
@@ -8237,6 +9654,100 @@
           "confirmed_at"
         ],
         "title": "VersionSummary"
+      },
+      "VideoVersionView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "round_id": {
+            "type": "string",
+            "title": "Round Id"
+          },
+          "version_no": {
+            "type": "integer",
+            "title": "Version No"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "V1、V2…"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in_review",
+              "changes_requested",
+              "accepted"
+            ],
+            "title": "Status"
+          },
+          "original_name": {
+            "type": "string",
+            "title": "Original Name"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "title": "Size Bytes"
+          },
+          "mime_type": {
+            "type": "string",
+            "title": "Mime Type"
+          },
+          "sha256": {
+            "type": "string",
+            "title": "Sha256"
+          },
+          "media_url": {
+            "type": "string",
+            "title": "Media Url",
+            "description": "带签名的播放地址（相对路径，1 小时有效）"
+          },
+          "feedback": {
+            "items": {
+              "$ref": "#/components/schemas/FeedbackView"
+            },
+            "type": "array",
+            "title": "Feedback"
+          },
+          "review": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "round_id",
+          "version_no",
+          "label",
+          "status",
+          "original_name",
+          "note",
+          "size_bytes",
+          "mime_type",
+          "sha256",
+          "media_url",
+          "feedback",
+          "review",
+          "created_at"
+        ],
+        "title": "VideoVersionView"
       }
     }
   }

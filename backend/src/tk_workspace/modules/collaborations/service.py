@@ -57,7 +57,7 @@ TRANSITIONS: dict[str, list[str]] = {
     "planned": ["contacting", "closed"],
     "contacting": ["negotiating", "closed"],
     "negotiating": ["contacting", "closed"],
-    "agreed": ["closed"],
+    "agreed": ["closed"],  # 有验收通过的视频后还可以“完成”（见 _allowed）
     "in_progress": ["closed"],
     "completed": [],
     "closed": ["contacting"],
@@ -305,7 +305,34 @@ _SHIPMENT_STEP = {
 }
 
 
-def _next_step(status: str, ship) -> str | None:
+def _stage(s: Session, collab_id: str):
+    from tk_workspace.modules.production import service as production
+
+    return production.stage(s, collab_id)
+
+
+def _production_step(r, stage) -> str | None:
+    rs = stage.round_status if stage else None
+    n = stage.round_no if stage else None
+    if rs == "briefing":
+        return f"确认第 {n} 轮拍摄包并发给达人"
+    if rs == "awaiting_video":
+        return f"等待达人交第 {n} 轮视频"
+    if rs == "in_review":
+        return f"审核第 {n} 轮视频"
+    if rs == "revision_requested":
+        return f"等待达人交第 {n} 轮返修版本"
+    if rs == "accepted":
+        agreed = r["agreed_video_count"]
+        if agreed and stage.accepted_videos >= agreed:
+            return "约定的视频已全部验收，可以完成合作"
+        return f"第 {n} 轮已验收，开始下一轮"
+    return None
+
+
+def _next_step(status: str, ship, r=None, stage=None) -> str | None:
+    if status in SHIPPABLE and stage and stage.round_status and stage.round_status != "briefing":
+        return _production_step(r, stage)
     if status == "planned":
         return "联系达人"
     if status == "contacting":
@@ -321,6 +348,8 @@ def _next_step(status: str, ship) -> str | None:
             return "跟进物流，登记签收"
         if ship.delivery_status in ("exception", "returned"):
             return "处理物流异常（补寄或关闭）"
+        if stage and stage.round_status == "briefing":
+            return _production_step(r, stage)
         return "准备拍摄包"
     return None
 
@@ -338,6 +367,12 @@ FOLLOW_UP_RULES: dict[str, tuple[int, str, bool]] = {
     "in_transit": (7, "寄出 {d} 天还没确认签收，跟进物流或问达人是否收到", False),
     "exception": (0, "物流异常，需要处理（补寄或关闭）", False),
     "delivered": (5, "签收 {d} 天了，跟进达人拍摄进度", False),
+    # M4 拍摄阶段
+    "briefing": (2, "拍摄包 {d} 天还没确认发给达人", False),
+    "awaiting_video": (7, "拍摄包发出 {d} 天还没收到视频，跟进拍摄进度", True),
+    "in_review": (1, "视频交来 {d} 天还没审核", False),
+    "revision_requested": (5, "要求返修 {d} 天还没收到新版本", True),
+    "round_accepted": (7, "上一条视频验收 {d} 天了，约下一条或完成合作", False),
 }
 
 
@@ -345,11 +380,25 @@ def _parse_ts(v: str) -> datetime:
     return datetime.fromisoformat(v.replace("Z", "+00:00"))
 
 
-def _phase(status: str, ship) -> str | None:
+def _phase(status: str, ship, stage=None, agreed_count: int | None = None) -> str | None:
     if status in ("planned", "contacting", "negotiating"):
         return status
     if status not in SHIPPABLE:
         return None
+    rs = stage.round_status if stage else None
+    if rs in ("awaiting_video", "in_review", "revision_requested"):
+        return rs
+    if rs == "accepted":
+        if agreed_count and stage.accepted_videos >= agreed_count:
+            return None  # 约定的视频已全部验收：只剩“完成合作”，不再提醒
+        return "round_accepted"
+    p = _ship_phase(ship)
+    if rs == "briefing" and p == "delivered":
+        return "briefing"
+    return p
+
+
+def _ship_phase(ship) -> str:
     if ship is None:
         return "no_shipment"
     if ship.status in ("draft", "awaiting_confirmation"):
@@ -363,8 +412,10 @@ def _phase(status: str, ship) -> str | None:
     return "in_transit"
 
 
-def _follow_up(s: Session, r, ship, now: datetime | None = None) -> FollowUp | None:
-    phase = _phase(r["status"], ship)
+def _follow_up(s: Session, r, ship, now: datetime | None = None, stage=None) -> FollowUp | None:
+    if stage is None and r["status"] in SHIPPABLE:
+        stage = _stage(s, r["id"])
+    phase = _phase(r["status"], ship, stage, r["agreed_video_count"])
     if phase is None:
         return None
     days, msg, suggest = FOLLOW_UP_RULES[phase]
@@ -397,7 +448,7 @@ def record_follow_up(collab_id: str, body: FollowUpIn) -> CollaborationDetail:
     now = utcnow_iso()
     with tx() as s:
         r = _collab_row(s, collab_id)
-        if _phase(r["status"], _latest_shipment(s, collab_id)) is None:
+        if _follow_up(s, r, _latest_shipment(s, collab_id)) is None:
             raise CollabError("not_active", "这个合作已关闭或已完成，不需要跟进")
         nxt = _iso(_parse_ts(now) + timedelta(days=body.next_in_days)) if body.next_in_days else None
         s.execute(
@@ -417,7 +468,7 @@ def snooze_follow_up(collab_id: str, body: SnoozeIn) -> CollaborationDetail:
     now = utcnow_iso()
     with tx() as s:
         r = _collab_row(s, collab_id)
-        if _phase(r["status"], _latest_shipment(s, collab_id)) is None:
+        if _follow_up(s, r, _latest_shipment(s, collab_id)) is None:
             raise CollabError("not_active", "这个合作已关闭或已完成，不需要跟进")
         s.execute(
             text("UPDATE collaborations SET follow_up_at=:f WHERE id=:id"),
@@ -428,6 +479,7 @@ def snooze_follow_up(collab_id: str, body: SnoozeIn) -> CollaborationDetail:
 
 def _summary(s: Session, r) -> CollaborationSummary:
     ship = _latest_shipment(s, r["id"])
+    stage = _stage(s, r["id"])
     handle = r["unique_id"]
     return CollaborationSummary(
         id=r["id"],
@@ -447,8 +499,9 @@ def _summary(s: Session, r) -> CollaborationSummary:
         product_name=r["product_name"],
         product_version_no=r["product_version_no"],
         agreed_at=r["agreed_at"],
-        next_step=_next_step(r["status"], ship),
-        follow_up=_follow_up(s, r, ship),
+        next_step=_next_step(r["status"], ship, r, stage),
+        follow_up=_follow_up(s, r, ship, stage=stage),
+        production=stage if stage.round_id or stage.accepted_videos else None,
         shipment_status=ship.status if ship else None,
         delivery_status=ship.delivery_status if ship and ship.status == "dispatched" else None,
         revision=r["revision"],
@@ -483,7 +536,7 @@ def _detail(s: Session, collab_id: str) -> CollaborationDetail:
         time_zone=r["time_zone"],
         agreement=AgreementView(**agreement) if agreement else None,
         agreed_video_count=r["agreed_video_count"],
-        allowed_transitions=TRANSITIONS.get(r["status"], []),
+        allowed_transitions=_allowed(r, base.production),
         can_confirm_agreement=r["status"] in AGREEABLE,
         can_create_shipment=r["status"] in SHIPPABLE,
         events=[
@@ -499,6 +552,13 @@ def _detail(s: Session, collab_id: str) -> CollaborationDetail:
         ],
         shipments=[_shipment_view(s, sid) for sid in ships],
     )
+
+
+def _allowed(r, stage) -> list[str]:
+    allowed = list(TRANSITIONS.get(r["status"], []))
+    if r["status"] in SHIPPABLE and stage and stage.accepted_videos > 0:
+        allowed.insert(0, "completed")
+    return allowed
 
 
 def get_collaboration(collab_id: str) -> CollaborationDetail:
@@ -631,9 +691,20 @@ def transition(collab_id: str, body: TransitionIn) -> CollaborationDetail:
     now = utcnow_iso()
     with tx() as s:
         r = _lock_collab(s, collab_id, body.revision)
-        if body.to not in TRANSITIONS.get(r["status"], []):
+        from tk_workspace.modules.production import service as production
+
+        stage = _stage(s, collab_id)
+        if body.to not in _allowed(r, stage):
+            if body.to == "completed":
+                raise CollabError("no_accepted_video", "还没有验收通过的视频，不能完成合作")
             raise CollabError("invalid_transition", f"当前状态不能改为 {body.to}")
-        if body.to == "closed":
+        if body.to == "completed":
+            if stage.round_status in ("awaiting_video", "in_review", "revision_requested"):
+                raise CollabError("round_open", f"第 {stage.round_no} 轮还在进行中，先验收或取消这一轮")
+            production.cancel_open_rounds(s, collab_id, now, "合作完成，未开始的轮次自动取消")
+            _set_status(s, r, "completed", now, closed=False)
+        elif body.to == "closed":
+            production.cancel_open_rounds(s, collab_id, now, "合作关闭，进行中的轮次自动取消")
             _set_status(s, r, "closed", now, closed=True, closed_reason=body.closed_reason)
             # 未寄出的寄样单一并取消，确认作废
             for sid in s.execute(
@@ -1259,3 +1330,26 @@ def reveal_recipient(sid: str) -> RecipientView:
             return RecipientView(recipient=RecipientIn(**_recipient(row)), tracking_number=_tracking(row))
         except crypto.PiiKeyError as e:
             raise CollabError("pii_key_unavailable", str(e)) from e
+
+
+# ---------------- 给其他模块用的公开函数（production 等） ----------------
+
+
+def collab_row(s: Session, collab_id: str):
+    """合作行（含达人、任务站点、产品版本信息）。"""
+    return _collab_row(s, collab_id)
+
+
+def lock_collab(s: Session, collab_id: str):
+    """要修改合作下的数据时调用：任务未归档，且合作处于“已达成约定 / 合作进行中”。"""
+    r = _lock_collab(s, collab_id, None)
+    if r["status"] not in SHIPPABLE:
+        raise CollabError("not_active", "合作需要处于“已达成约定”或“合作进行中”")
+    return r
+
+
+def add_event(s: Session, collab_id: str, kind: str, note: str, ref_id: str | None = None) -> None:
+    """写一条合作历史（算作一次进展，跟进提醒重新计时）。"""
+    now = utcnow_iso()
+    _event(s, collab_id, kind, now, note=note, ref_id=ref_id)
+    s.execute(text("UPDATE collaborations SET updated_at=:n WHERE id=:id"), {"n": now, "id": collab_id})

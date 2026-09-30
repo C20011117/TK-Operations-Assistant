@@ -8,6 +8,7 @@ import { CollaborationsPage } from "@/features/collaborations/CollaborationsPage
 import { MarketsPage } from "@/features/markets/MarketsPage";
 import { ProductDetailPage } from "@/features/products/ProductDetailPage";
 import { ProductsPage } from "@/features/products/ProductsPage";
+import { RoundPage } from "@/features/production/RoundPage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
 import { SystemPage } from "@/features/system/SystemPage";
 import { WorkbenchPage } from "@/features/workbench/WorkbenchPage";
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
       { path: "campaigns/:campaignId", element: <CampaignDetailPage /> },
       { path: "collaborations", element: <CollaborationsPage /> },
       { path: "collaborations/:collabId", element: <CollaborationDetailPage /> },
+      { path: "rounds/:roundId", element: <RoundPage /> },
       { path: "markets", element: <MarketsPage /> },
       { path: "system", element: <SystemPage /> },
       { path: "settings", element: <SettingsPage /> },

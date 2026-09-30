@@ -107,7 +107,8 @@ def _llm_configured() -> bool:
     return get_llm_config().configured
 
 
-def _context(s, r, body: OutreachDraftIn) -> tuple[dict[str, Any], str]:
+def base_context(s, r, language: str | None) -> tuple[dict[str, Any], str]:
+    """产品、站点条款、合作形式、达人公开数据、双方约定。不含收件信息等个人数据。"""
     facts = json.loads(
         s.execute(
             text("SELECT facts FROM product_versions WHERE id=:id"), {"id": r["product_version_id"]}
@@ -138,7 +139,7 @@ def _context(s, r, body: OutreachDraftIn) -> tuple[dict[str, Any], str]:
         .first()
     )
     langs = json.loads(market["content_languages"]) if market else ["en"]
-    language = body.language or (langs[0] if langs else "en")
+    language = language or (langs[0] if langs else "en")
 
     creator: dict[str, Any] = {"nickname": r["nickname"] or r["unique_id"], "handle": r["unique_id"]}
     if r["evaluation_id"]:
@@ -161,10 +162,7 @@ def _context(s, r, body: OutreachDraftIn) -> tuple[dict[str, Any], str]:
                 creator["fit_points"] = [p.get("text") for p in a.get("fit_points", [])][:4]
 
     ctx: dict[str, Any] = {
-        "purpose": body.purpose,
-        "channel": body.channel,
         "language": f"{language} ({LANG_NAMES.get(language, language)})",
-        "tone": body.tone,
         "market": market["name_en"] if market else r["market_code"],
         "product": {
             "name": r["product_name"],
@@ -179,10 +177,21 @@ def _context(s, r, body: OutreachDraftIn) -> tuple[dict[str, Any], str]:
             "type": camp.collaboration_type if camp else None,
         },
         "creator": creator,
-        "bd_notes": body.extra or None,
     }
     if r["agreement"]:
         ctx["agreement"] = json.loads(r["agreement"])
+    return ctx, language
+
+
+def _context(s, r, body: OutreachDraftIn) -> tuple[dict[str, Any], str]:
+    base, language = base_context(s, r, body.language)
+    ctx: dict[str, Any] = {
+        "purpose": body.purpose,
+        "channel": body.channel,
+        "tone": body.tone,
+        **base,
+        "bd_notes": body.extra or None,
+    }
     if body.purpose == "follow_up":
         prev = s.execute(
             text(

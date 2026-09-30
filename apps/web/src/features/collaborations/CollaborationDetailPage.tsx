@@ -9,6 +9,8 @@ import { agreedViaLabels, closedReasonLabels, collabStatusLabels, fmtTime, local
 
 import { collabTone } from "./CollaborationsPage";
 import { FollowUpBar } from "./followUp";
+import { ProductionCard } from "@/features/production/ProductionCard";
+
 import { OutreachCard } from "./OutreachCard";
 import { ShipmentCard } from "./ShipmentCard";
 import { ShipmentForm } from "./ShipmentForm";
@@ -34,7 +36,7 @@ function ProgressCard({ c, onDraftFollowUp }: { c: CollaborationDetail; onDraftF
   const [closing, setClosing] = useState(false);
   const [reason, setReason] = useState<ClosedReason>("no_reply");
   const move = useMutation({
-    mutationFn: (to: "contacting" | "negotiating" | "closed") =>
+    mutationFn: (to: "contacting" | "negotiating" | "closed" | "completed") =>
       unwrap(
         api.POST("/api/v1/collaborations/{collab_id}/transitions", {
           params: { path: { collab_id: c.id } },
@@ -47,8 +49,13 @@ function ProgressCard({ c, onDraftFollowUp }: { c: CollaborationDetail; onDraftF
       set(d);
     },
   });
-  const label = { contacting: c.status === "closed" ? "重新联系" : "已联系", negotiating: "开始洽谈", closed: "关闭合作" } as const;
-  const steps = c.allowed_transitions.filter((t) => t !== "closed") as ("contacting" | "negotiating")[];
+  const label = {
+    contacting: c.status === "closed" ? "重新联系" : "已联系",
+    negotiating: "开始洽谈",
+    closed: "关闭合作",
+    completed: "完成合作",
+  } as const;
+  const steps = c.allowed_transitions.filter((t) => t !== "closed") as ("contacting" | "negotiating" | "completed")[];
   return (
     <Card title="合作进度">
       <div className="space-y-3">
@@ -62,7 +69,7 @@ function ProgressCard({ c, onDraftFollowUp }: { c: CollaborationDetail; onDraftF
             <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="备注（可选），例如：已通过 TikTok 私信发出邀约" />
             <div className="flex flex-wrap items-center gap-2">
               {steps.map((t) => (
-                <Button key={t} variant="secondary" disabled={move.isPending} onClick={() => move.mutate(t)}>
+                <Button key={t} variant={t === "completed" ? "primary" : "secondary"} disabled={move.isPending} onClick={() => move.mutate(t)}>
                   {label[t]}
                 </Button>
               ))}
@@ -257,8 +264,19 @@ export function CollaborationDetailPage() {
         <ProgressCard c={c} onDraftFollowUp={() => setFollowUpRequest((n) => n + 1)} />
         <AgreementCard c={c} />
       </div>
-      <OutreachCard c={c} followUpRequest={followUpRequest} />
-      <ShipmentsCard c={c} refresh={refresh} />
+      {c.can_create_shipment || c.status === "completed" ? (
+        <>
+          <ShipmentsCard c={c} refresh={refresh} />
+          <ProductionCard c={c} />
+          <OutreachCard c={c} followUpRequest={followUpRequest} />
+        </>
+      ) : (
+        <>
+          <OutreachCard c={c} followUpRequest={followUpRequest} />
+          <ShipmentsCard c={c} refresh={refresh} />
+          <ProductionCard c={c} />
+        </>
+      )}
       <Card title="历史">
         <ul className="space-y-1 text-sm">
           {c.events.map((e) => (

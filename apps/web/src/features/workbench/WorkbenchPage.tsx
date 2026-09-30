@@ -8,10 +8,6 @@ import type { CollaborationSummary } from "@/lib/api/types";
 
 // 待办分组来自产品规格“核心界面建议”。尚无业务数据，按里程碑标明何时开放，不显示虚构数字。
 const groups = [
-  { key: "to_brief", label: "待发拍摄包", milestone: "M4" },
-  { key: "to_collect", label: "待回收视频", milestone: "M4" },
-  { key: "to_review", label: "待审核", milestone: "M4" },
-  { key: "to_revise", label: "待返修", milestone: "M4" },
   { key: "next_round", label: "待约下一条", milestone: "M5" },
   { key: "maintain", label: "待维护", milestone: "M5" },
 ];
@@ -20,11 +16,12 @@ function who(c: CollaborationSummary) {
   return c.creator.nickname ?? c.creator.unique_id ?? "达人";
 }
 
-function LiveList({ title, rows, empty, detail }: {
+function LiveList({ title, rows, empty, detail, href }: {
   title: string;
   rows: CollaborationSummary[] | undefined;
   empty: string;
   detail: (c: CollaborationSummary) => string;
+  href?: (c: CollaborationSummary) => string;
 }) {
   return (
     <Card>
@@ -36,7 +33,7 @@ function LiveList({ title, rows, empty, detail }: {
       <ul className="mt-3 space-y-2 text-sm">
         {rows?.slice(0, 6).map((c) => (
           <li key={c.id}>
-            <Link to={`/collaborations/${c.id}`} className="font-medium text-sky-700 hover:underline">
+            <Link to={href ? href(c) : `/collaborations/${c.id}`} className="font-medium text-sky-700 hover:underline">
               {who(c)}
             </Link>
             <span className="ml-1 text-xs text-slate-500">
@@ -64,6 +61,16 @@ export function WorkbenchPage() {
   const toShip = active.data?.filter(
     (c) => c.status === "agreed" && c.shipment_status !== "dispatched",
   );
+  const rs = (s: string) => active.data?.filter((c) => c.production?.round_status === s);
+  const toBrief = active.data?.filter(
+    (c) =>
+      (c.status === "agreed" || c.status === "in_progress") &&
+      c.shipment_status === "dispatched" &&
+      (!c.production?.round_status || c.production.round_status === "briefing"),
+  );
+  const step = (c: CollaborationSummary) => c.next_step ?? "";
+  const roundLink = (c: CollaborationSummary) =>
+    c.production?.round_id ? `/rounds/${c.production.round_id}` : `/collaborations/${c.id}`;
   return (
     <div className="space-y-6">
       <div>
@@ -83,7 +90,13 @@ export function WorkbenchPage() {
           empty="没有到期的跟进。"
           detail={(c) => c.follow_up?.message ?? ""}
         />
-        <LiveList title="待寄样" rows={toShip} empty="没有等待寄样的合作。" detail={(c) => c.next_step ?? ""} />
+        <LiveList title="待寄样" rows={toShip} empty="没有等待寄样的合作。" detail={step} />
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <LiveList title="待发拍摄包" rows={toBrief} empty="没有要准备拍摄包的合作。" detail={step} />
+        <LiveList title="待回收视频" rows={rs("awaiting_video")} empty="没有在等的视频。" detail={step} />
+        <LiveList title="待审核" rows={rs("in_review")} empty="没有待审核的视频。" detail={step} href={roundLink} />
+        <LiveList title="待返修" rows={rs("revision_requested")} empty="没有在等的返修。" detail={step} href={roundLink} />
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {groups.map((g) => (

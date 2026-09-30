@@ -917,6 +917,227 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/collaborations/{collab_id}/production": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 拍摄包版本与各轮视频（合作详情页的“拍摄与视频”） */
+        get: operations["production_api_v1_collaborations__collab_id__production_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collaborations/{collab_id}/brief-versions/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** AI 生成拍摄包新版本（目标语言 + 中文对照）；不含收件信息 */
+        post: operations["brief_generate_api_v1_collaborations__collab_id__brief_versions_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collaborations/{collab_id}/brief-versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 手动修改拍摄包：以某个版本为基础保存为新版本（旧版本不变） */
+        post: operations["brief_save_api_v1_collaborations__collab_id__brief_versions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collaborations/{collab_id}/brief/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 确认拍摄包：写入当前轮次（没有则开始新一轮），本轮拍摄包从此锁定 */
+        post: operations["brief_confirm_api_v1_collaborations__collab_id__brief_confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collaborations/{collab_id}/rounds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 开始新一轮拍摄（1 轮 = 1 条新视频）；已有未确认拍摄包的轮次时返回它 */
+        post: operations["round_start_api_v1_collaborations__collab_id__rounds_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rounds/{round_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 某一轮的拍摄包与视频版本 */
+        get: operations["round_get_api_v1_rounds__round_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rounds/{round_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 取消这一轮（不计数） */
+        post: operations["round_cancel_api_v1_rounds__round_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rounds/{round_id}/videos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 上传视频（请求体就是文件本身）；同一文件重复上传返回已有版本 */
+        post: operations["video_upload_api_v1_rounds__round_id__videos_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/video-versions/{vid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 视频版本（含反馈与审核结论） */
+        get: operations["video_get_api_v1_video_versions__vid__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/video-versions/{vid}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 添加时间码反馈（审核结论提交前） */
+        post: operations["feedback_add_api_v1_video_versions__vid__feedback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/feedback-items/{fid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** 删除还没提交的反馈 */
+        delete: operations["feedback_delete_api_v1_feedback_items__fid__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/video-versions/{vid}/feedback-message": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 把时间码反馈写成发给达人的消息（目标语言 + 中文对照）；只生成，不代发 */
+        post: operations["feedback_message_api_v1_video_versions__vid__feedback_message_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/video-versions/{vid}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 审核结论：要求返修（至少 1 条反馈）或验收通过（本轮计 1 条） */
+        post: operations["video_review_api_v1_video_versions__vid__review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -989,6 +1210,78 @@ export interface components {
             version: string;
             /** Data Dir */
             data_dir: string;
+        };
+        /** BriefGenerateIn */
+        BriefGenerateIn: {
+            /**
+             * Language
+             * @description 目标语言代码；为空时用站点的常见语言
+             */
+            language?: string | null;
+            /**
+             * Video Length S
+             * @description 建议视频时长（秒）
+             * @default 30
+             */
+            video_length_s: number;
+            /**
+             * Extra
+             * @description BD 想补充的要求
+             * @default
+             */
+            extra: string;
+        };
+        /**
+         * BriefSaveIn
+         * @description 手动修改：以某个版本为基础保存为新版本。
+         */
+        BriefSaveIn: {
+            /** Based On Version Id */
+            based_on_version_id: string;
+            /** Title */
+            title: string;
+            /** Body */
+            body: string;
+            /**
+             * Body Zh
+             * @default
+             */
+            body_zh: string;
+        };
+        /** BriefVersionView */
+        BriefVersionView: {
+            /** Id */
+            id: string;
+            /** Version No */
+            version_no: number;
+            /** Content Language */
+            content_language: string;
+            /** Title */
+            title: string;
+            /** Body */
+            body: string;
+            /** Body Zh */
+            body_zh: string;
+            /** Cautions */
+            cautions: string[];
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "ai" | "manual";
+            /** Based On Version Id */
+            based_on_version_id: string | null;
+            /** Product Version Id */
+            product_version_id: string;
+            /** Model */
+            model: string | null;
+            /**
+             * Locked Round Nos
+             * @description 锁定了这个版本的轮次
+             */
+            locked_round_nos: number[];
+            /** Created At */
+            created_at: string;
         };
         /** CampaignCreate */
         CampaignCreate: {
@@ -1291,6 +1584,8 @@ export interface components {
             next_step: string | null;
             /** @description 跟进提醒；已关闭 / 已完成的合作为空 */
             follow_up?: components["schemas"]["FollowUp"] | null;
+            /** @description 拍摄阶段（最近一轮，不含已取消的轮次） */
+            production?: components["schemas"]["ProductionStage"] | null;
             /**
              * Shipment Status
              * @description 最近一张寄样单的状态
@@ -1355,6 +1650,8 @@ export interface components {
             next_step: string | null;
             /** @description 跟进提醒；已关闭 / 已完成的合作为空 */
             follow_up?: components["schemas"]["FollowUp"] | null;
+            /** @description 拍摄阶段（最近一轮，不含已取消的轮次） */
+            production?: components["schemas"]["ProductionStage"] | null;
             /**
              * Shipment Status
              * @description 最近一张寄样单的状态
@@ -1427,6 +1724,16 @@ export interface components {
              * @description 按哪个产品类目推荐；为空表示只按关键词
              */
             category_path: string | null;
+        };
+        /** ConfirmBriefIn */
+        ConfirmBriefIn: {
+            /** Brief Version Id */
+            brief_version_id: string;
+            /**
+             * Revision
+             * @description 轮次的 revision，用于防止并发修改
+             */
+            revision?: number | null;
         };
         /** ConfirmIn */
         ConfirmIn: {
@@ -1715,6 +2022,74 @@ export interface components {
             api_key_hint: string | null;
             /** Configured */
             configured: boolean;
+        };
+        /** FeedbackIn */
+        FeedbackIn: {
+            /** Timecode Ms */
+            timecode_ms: number;
+            /**
+             * Category
+             * @default other
+             * @enum {string}
+             */
+            category: "script" | "visual" | "audio" | "product" | "compliance" | "other";
+            /**
+             * Severity
+             * @default must
+             * @enum {string}
+             */
+            severity: "must" | "should";
+            /** Body */
+            body: string;
+        };
+        /** FeedbackMessageIn */
+        FeedbackMessageIn: {
+            /** Language */
+            language?: string | null;
+            /**
+             * Extra
+             * @default
+             */
+            extra: string;
+        };
+        /** FeedbackMessageView */
+        FeedbackMessageView: {
+            /** Language */
+            language: string;
+            /** Message */
+            message: string;
+            /** Message Zh */
+            message_zh: string;
+            /** Warnings */
+            warnings: string[];
+        };
+        /** FeedbackView */
+        FeedbackView: {
+            /** Id */
+            id: string;
+            /** Video Version Id */
+            video_version_id: string;
+            /** Timecode Ms */
+            timecode_ms: number;
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "script" | "visual" | "audio" | "product" | "compliance" | "other";
+            /**
+             * Severity
+             * @enum {string}
+             */
+            severity: "must" | "should";
+            /** Body */
+            body: string;
+            /**
+             * Submitted
+             * @description 已随审核结论提交，不能再修改
+             */
+            submitted: boolean;
+            /** Created At */
+            created_at: string;
         };
         /** FieldOption */
         FieldOption: {
@@ -2308,6 +2683,55 @@ export interface components {
             /** Confirmed At */
             confirmed_at: string | null;
         };
+        /**
+         * ProductionStage
+         * @description 给合作列表 / 工作台用的拍摄阶段摘要。
+         */
+        ProductionStage: {
+            /** Round Id */
+            round_id: string | null;
+            /** Round No */
+            round_no: number | null;
+            /** Round Status */
+            round_status: ("briefing" | "awaiting_video" | "in_review" | "revision_requested" | "accepted" | "cancelled") | null;
+            /** Accepted Videos */
+            accepted_videos: number;
+            /** Last Activity At */
+            last_activity_at: string | null;
+        };
+        /**
+         * ProductionView
+         * @description 合作详情页的“拍摄与视频”卡片。
+         */
+        ProductionView: {
+            /** Collaboration Id */
+            collaboration_id: string;
+            /**
+             * Content Language
+             * @description 站点默认内容语言
+             */
+            content_language: string;
+            /** Content Languages */
+            content_languages: string[];
+            /**
+             * Brief Versions
+             * @description 新到旧
+             */
+            brief_versions: components["schemas"]["BriefVersionView"][];
+            /**
+             * Rounds
+             * @description 新到旧
+             */
+            rounds: components["schemas"]["RoundView"][];
+            /** Accepted Videos */
+            accepted_videos: number;
+            /** Agreed Video Count */
+            agreed_video_count: number | null;
+            /** Can Start Round */
+            can_start_round: boolean;
+            /** Start Round Blocker */
+            start_round_blocker: string | null;
+        };
         /** ProviderCallView */
         ProviderCallView: {
             /** Id */
@@ -2419,6 +2843,89 @@ export interface components {
             snapshot: components["schemas"]["SnapshotView"] | null;
             /** Cards */
             cards: components["schemas"]["RecommendationCard"][];
+        };
+        /** ReviewIn */
+        ReviewIn: {
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "changes_requested" | "accepted";
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+            /**
+             * Message
+             * @description 发给达人的反馈消息（目标语言）
+             */
+            message?: string | null;
+            /** Message Language */
+            message_language?: string | null;
+        };
+        /** ReviewView */
+        ReviewView: {
+            /** Id */
+            id: string;
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "changes_requested" | "accepted";
+            /** Summary */
+            summary: string;
+            /** Message */
+            message: string | null;
+            /** Message Language */
+            message_language: string | null;
+            /** Created At */
+            created_at: string;
+        };
+        /** RoundIn */
+        RoundIn: {
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+        };
+        /** RoundView */
+        RoundView: {
+            /** Id */
+            id: string;
+            /** Collaboration Id */
+            collaboration_id: string;
+            /** Round No */
+            round_no: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "briefing" | "awaiting_video" | "in_review" | "revision_requested" | "accepted" | "cancelled";
+            /** @description 本轮锁定的拍摄包版本 */
+            brief_version: components["schemas"]["BriefVersionView"] | null;
+            /** Brief Confirmed At */
+            brief_confirmed_at: string | null;
+            /** Videos */
+            videos: components["schemas"]["VideoVersionView"][];
+            /** Accepted Version Id */
+            accepted_version_id: string | null;
+            /** Accepted At */
+            accepted_at: string | null;
+            /**
+             * Counted
+             * @description 本轮已验收，计 1 条新视频
+             */
+            counted: boolean;
+            /** Can Upload */
+            can_upload: boolean;
+            /** Revision */
+            revision: number;
+            /** Created At */
+            created_at: string;
+            /** Updated At */
+            updated_at: string;
         };
         /** RunView */
         RunView: {
@@ -2697,7 +3204,7 @@ export interface components {
              * To
              * @enum {string}
              */
-            to: "contacting" | "negotiating" | "closed";
+            to: "contacting" | "negotiating" | "closed" | "completed";
             /**
              * Note
              * @default
@@ -2739,6 +3246,45 @@ export interface components {
             created_at: string;
             /** Confirmed At */
             confirmed_at: string | null;
+        };
+        /** VideoVersionView */
+        VideoVersionView: {
+            /** Id */
+            id: string;
+            /** Round Id */
+            round_id: string;
+            /** Version No */
+            version_no: number;
+            /**
+             * Label
+             * @description V1、V2…
+             */
+            label: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "in_review" | "changes_requested" | "accepted";
+            /** Original Name */
+            original_name: string;
+            /** Note */
+            note: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Mime Type */
+            mime_type: string;
+            /** Sha256 */
+            sha256: string;
+            /**
+             * Media Url
+             * @description 带签名的播放地址（相对路径，1 小时有效）
+             */
+            media_url: string;
+            /** Feedback */
+            feedback: components["schemas"]["FeedbackView"][];
+            review: components["schemas"]["ReviewView"] | null;
+            /** Created At */
+            created_at: string;
         };
     };
     responses: never;
@@ -4797,6 +5343,446 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecipientView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    production_api_v1_collaborations__collab_id__production_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collab_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    brief_generate_api_v1_collaborations__collab_id__brief_versions_generate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collab_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BriefGenerateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BriefVersionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    brief_save_api_v1_collaborations__collab_id__brief_versions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collab_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BriefSaveIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BriefVersionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    brief_confirm_api_v1_collaborations__collab_id__brief_confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collab_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmBriefIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoundView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    round_start_api_v1_collaborations__collab_id__rounds_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collab_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RoundIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoundView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    round_get_api_v1_rounds__round_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                round_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoundView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    round_cancel_api_v1_rounds__round_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                round_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoundView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    video_upload_api_v1_rounds__round_id__videos_post: {
+        parameters: {
+            query?: {
+                note?: string;
+            };
+            header: {
+                "X-Filename": string;
+            };
+            path: {
+                round_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "video/mp4": string;
+                "video/quicktime": string;
+                "video/webm": string;
+                "video/x-m4v": string;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoVersionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    video_get_api_v1_video_versions__vid__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                vid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoVersionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    feedback_add_api_v1_video_versions__vid__feedback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                vid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedbackIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    feedback_delete_api_v1_feedback_items__fid__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                fid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    feedback_message_api_v1_video_versions__vid__feedback_message_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                vid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedbackMessageIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackMessageView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    video_review_api_v1_video_versions__vid__review_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                vid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoundView"];
                 };
             };
             /** @description Validation Error */

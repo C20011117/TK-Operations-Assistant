@@ -16,6 +16,7 @@ from tk_workspace.modules.campaigns import router as campaigns_router
 from tk_workspace.modules.collaborations import router as collaborations_router
 from tk_workspace.modules.knowledge import router as knowledge_router
 from tk_workspace.modules.matching import router as matching_router
+from tk_workspace.modules.production import router as production_router
 from tk_workspace.modules.settings import router as settings_router
 
 log = logging.getLogger("tk_workspace")
@@ -70,6 +71,7 @@ def create_app(settings: Settings | None = None, token: str | None = None) -> Fa
     app.include_router(campaigns_router.router, prefix=api)
     app.include_router(matching_router.router, prefix=api)
     app.include_router(collaborations_router.router, prefix=api)
+    app.include_router(production_router.router, prefix=api)
 
     # 中间件后加的在外层：CORS 在最外层处理预检，其次是令牌校验
     app.add_middleware(LocalAuthMiddleware, token=token or resolve_token(s))
@@ -80,7 +82,7 @@ def create_app(settings: Settings | None = None, token: str | None = None) -> Fa
         CORSMiddleware,
         allow_origins=origins,
         allow_methods=["GET", "POST", "PUT", "DELETE"],
-        allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "X-Request-ID"],
+        allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "X-Request-ID", "X-Filename"],
         expose_headers=["Idempotent-Replayed", "X-Request-ID"],
     )
     return app

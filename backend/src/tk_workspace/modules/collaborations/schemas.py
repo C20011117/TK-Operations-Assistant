@@ -7,6 +7,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, StringConstraints, field_validator, model_validator
 
+from tk_workspace.modules.production.schemas import ProductionStage
+
 Decision = Literal["keep", "needs_verification", "exclude", "reconsider"]
 DecisionReason = Literal[
     "good_fit",
@@ -87,7 +89,7 @@ class CollaborationCreate(BaseModel):
 
 
 class TransitionIn(BaseModel):
-    to: Literal["contacting", "negotiating", "closed"]
+    to: Literal["contacting", "negotiating", "closed", "completed"]
     note: Note = ""
     closed_reason: ClosedReason | None = None
     revision: int | None = Field(None, description="看到的版本号；与当前不一致时拒绝（避免覆盖别处的修改）")
@@ -162,6 +164,7 @@ class CollaborationSummary(BaseModel):
     agreed_at: str | None
     next_step: str | None = Field(description="下一步该做什么（中文提示）")
     follow_up: FollowUp | None = Field(None, description="跟进提醒；已关闭 / 已完成的合作为空")
+    production: ProductionStage | None = Field(None, description="拍摄阶段（最近一轮，不含已取消的轮次）")
     shipment_status: str | None = Field(description="最近一张寄样单的状态")
     delivery_status: str | None
     revision: int

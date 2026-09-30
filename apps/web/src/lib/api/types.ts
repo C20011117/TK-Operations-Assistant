@@ -48,3 +48,12 @@ export type ConfirmationPreview = S["ConfirmationPreview"];
 export type FollowUp = S["FollowUp"];
 export type OutreachDraftView = S["OutreachDraftView"];
 export type OutreachDraftIn = S["OutreachDraftIn"];
+
+export type ProductionView = S["ProductionView"];
+export type ProductionStage = S["ProductionStage"];
+export type BriefVersionView = S["BriefVersionView"];
+export type RoundView = S["RoundView"];
+export type VideoVersionView = S["VideoVersionView"];
+export type FeedbackView = S["FeedbackView"];
+export type FeedbackIn = S["FeedbackIn"];
+export type FeedbackMessageView = S["FeedbackMessageView"];
