@@ -9,9 +9,13 @@ const backend: Middleware = {
     const { baseUrl, token } = await getBackend();
     const url = new URL(request.url);
     const target = baseUrl ? `${baseUrl}${url.pathname}${url.search}` : request.url;
-    const next = new Request(target, request);
-    next.headers.set("Authorization", `Bearer ${token}`);
-    return next;
+    // 不能用 new Request(target, request)：Chromium/WebView2 会把请求体变成流式上传（只支持 HTTP/2），
+    // 对本机 HTTP/1.1 后端直接失败（ERR_ALPN_NEGOTIATION_FAILED）。先把请求体读出来再重建请求。
+    const hasBody = request.method !== "GET" && request.method !== "HEAD";
+    const body = hasBody ? await request.arrayBuffer() : undefined;
+    const headers = new Headers(request.headers);
+    headers.set("Authorization", `Bearer ${token}`);
+    return new Request(target, { method: request.method, headers, body, signal: request.signal });
   },
 };
 

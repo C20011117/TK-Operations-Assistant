@@ -263,8 +263,8 @@ export function ShipmentCard({
               {s.carrier} {s.tracking_masked}
             </div>
           ) : null}
-          {s.dispatched_at && <div className="text-xs text-slate-500">寄出：{fmtTime(s.dispatched_at)}</div>}
-          {s.delivered_at && <div className="text-xs text-slate-500">签收：{fmtTime(s.delivered_at)}</div>}
+          {s.dispatched_at && <div className="text-xs text-slate-500">寄出：{s.dispatched_at.slice(0, 10)}</div>}
+          {s.delivered_at && <div className="text-xs text-slate-500">签收：{s.delivered_at.slice(0, 10)}</div>}
           {s.confirmation && (
             <div className="text-xs text-slate-500">
               本人确认于 {fmtTime(s.confirmation.confirmed_at)}

@@ -11,7 +11,7 @@ type Decision = keyof typeof decisionLabels;
 type Reason = keyof typeof decisionReasonLabels;
 
 const tone = { keep: "green", needs_verification: "blue", exclude: "red", reconsider: "slate" } as const;
-const keepReasons: Reason[] = ["good_fit", "category_match", "competitor_seller", "other"];
+const keepReasons: Reason[] = ["good_fit", "category_match", "competitor_seller"];
 const excludeReasons: Reason[] = ["off_target", "audience_mismatch", "too_small", "too_expensive", "data_doubt", "not_eligible", "other"];
 
 export function DecisionBadge({ d }: { d: DecisionView | undefined }) {
