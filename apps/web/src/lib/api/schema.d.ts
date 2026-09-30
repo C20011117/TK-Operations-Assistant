@@ -1766,7 +1766,7 @@ export interface components {
             structured_mode: "json_schema" | "function_calling" | "json_mode";
             /**
              * Timeout Seconds
-             * @default 60
+             * @default 180
              */
             timeout_seconds: number;
             /**

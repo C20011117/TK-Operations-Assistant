@@ -18,7 +18,7 @@ class LLMConfig(BaseModel):
     model_matching: str = ""
     model_brief: str = ""
     structured_mode: StructuredMode = "json_schema"
-    timeout_seconds: int = Field(default=60, ge=5, le=600)
+    timeout_seconds: int = Field(default=180, ge=5, le=600)
     data_region: str = ""
     api_key: str = Field(default="", exclude=True)
 

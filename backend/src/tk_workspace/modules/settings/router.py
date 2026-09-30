@@ -41,7 +41,7 @@ class LLMSettingsUpdate(BaseModel):
     model_matching: str = Field(default="", max_length=200)
     model_brief: str = Field(default="", max_length=200)
     structured_mode: service.StructuredMode = "json_schema"
-    timeout_seconds: int = Field(default=60, ge=5, le=600)
+    timeout_seconds: int = Field(default=180, ge=5, le=600)
     data_region: str = Field(default="", max_length=100)
     # None：不修改已保存的 Key；""：删除
     api_key: str | None = Field(default=None, max_length=500)
