@@ -128,6 +128,26 @@ class CollabEventView(BaseModel):
     created_at: str
 
 
+class FollowUp(BaseModel):
+    """跟进提醒：按阶段和最近一次进展时间计算；“稍后提醒”会改为手动时间。"""
+
+    due_at: str = Field(description="该跟进的时间（UTC）")
+    overdue: bool = Field(description="已到期，需要跟进")
+    idle_days: int = Field(description="距最近一次进展的天数")
+    message: str = Field(description="提醒内容（中文）")
+    source: Literal["rule", "manual"]
+    suggest_follow_up_draft: bool = Field(description="适合生成跟进话术（已联系 / 洽谈中）")
+
+
+class FollowUpIn(BaseModel):
+    note: Note = Field("", description="这次怎么跟进的，例如：再次私信提醒")
+    next_in_days: int | None = Field(None, ge=1, le=60, description="几天后再提醒；不填按规则")
+
+
+class SnoozeIn(BaseModel):
+    days: int = Field(..., ge=1, le=60)
+
+
 class CollaborationSummary(BaseModel):
     id: str
     status: CollabStatus
@@ -141,6 +161,7 @@ class CollaborationSummary(BaseModel):
     product_version_no: int
     agreed_at: str | None
     next_step: str | None = Field(description="下一步该做什么（中文提示）")
+    follow_up: FollowUp | None = Field(None, description="跟进提醒；已关闭 / 已完成的合作为空")
     shipment_status: str | None = Field(description="最近一张寄样单的状态")
     delivery_status: str | None
     revision: int
@@ -312,3 +333,39 @@ def mask_tracking(t: str | None) -> str | None:
         return None
     t = re.sub(r"\s+", "", t)
     return f"***{t[-4:]}" if len(t) > 4 else "***"
+
+
+# ---------------- 邀约话术 ----------------
+
+OutreachPurpose = Literal["invite", "follow_up"]
+OutreachChannel = Literal["tiktok_message", "email"]
+
+
+class OutreachDraftIn(BaseModel):
+    purpose: OutreachPurpose = "invite"
+    channel: OutreachChannel = "tiktok_message"
+    language: str | None = Field(
+        None, pattern=r"^[a-z]{2}$", description="目标语言（ISO 639-1）；不填用站点的第一种内容语言"
+    )
+    tone: Literal["friendly", "professional"] = "friendly"
+    extra: Note = Field("", description="BD 想补充的要点，例如：可以先寄样再谈佣金")
+
+
+class OutreachDraftView(BaseModel):
+    id: str
+    collaboration_id: str
+    purpose: OutreachPurpose
+    channel: OutreachChannel
+    language: str
+    subject: str | None
+    message: str
+    message_zh: str
+    personalization: list[str]
+    warnings: list[str] = Field(description="发送前需要注意的地方（系统检查 + 模型提示）")
+    model: str | None
+    sent_at: str | None
+    created_at: str
+
+
+class MarkSentIn(BaseModel):
+    note: Note = ""

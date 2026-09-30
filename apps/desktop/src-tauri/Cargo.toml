@@ -1,6 +1,6 @@
 [package]
 name = "tk-workspace"
-version = "0.3.1"
+version = "0.3.2"
 description = "TK 多站点达人开发与内容运营工作台"
 edition = "2021"
 publish = false

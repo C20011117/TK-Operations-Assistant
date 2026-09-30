@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { NavLink, Outlet } from "react-router";
 
+import { useDueFollowUps } from "@/features/collaborations/followUp";
 import { api } from "@/lib/api/client";
 
 const nav = [
@@ -19,6 +20,8 @@ export function AppLayout() {
     queryFn: async () => (await api.GET("/api/v1/system/info")).data ?? null,
     staleTime: Infinity,
   });
+  const due = useDueFollowUps();
+  const dueCount = due.data?.length ?? 0;
 
   return (
     <div className="min-h-screen">
@@ -37,6 +40,11 @@ export function AppLayout() {
                   }
                 >
                   {n.label}
+                  {n.to === "/collaborations" && dueCount > 0 && (
+                    <span className="ml-1 rounded-full bg-amber-500 px-1.5 text-xs text-white" title="到期该跟进">
+                      {dueCount}
+                    </span>
+                  )}
                 </NavLink>
               ))}
             </nav>

@@ -32,6 +32,8 @@ from tk_workspace.modules.collaborations.schemas import (
     DecisionIn,
     DecisionView,
     DispatchIn,
+    FollowUp,
+    FollowUpIn,
     RecipientIn,
     RecipientView,
     ShipmentEventIn,
@@ -39,6 +41,7 @@ from tk_workspace.modules.collaborations.schemas import (
     ShipmentIn,
     ShipmentItem,
     ShipmentView,
+    SnoozeIn,
     TransitionIn,
     mask_recipient,
     mask_tracking,
@@ -280,6 +283,9 @@ def _event(s: Session, collab_id: str, kind: str, now: str, **kw: Any) -> None:
             "now": now,
         },
     )
+    if kind != "follow_up":
+        # 有了新进展：“稍后提醒”设定的时间作废，按规则重新计时
+        s.execute(text("UPDATE collaborations SET follow_up_at=NULL WHERE id=:id"), {"id": collab_id})
 
 
 def _latest_shipment(s: Session, collab_id: str):
@@ -319,6 +325,107 @@ def _next_step(status: str, ship) -> str | None:
     return None
 
 
+# ---------------- 跟进提醒 ----------------
+# 按“当前阶段 + 最近一次进展”计算，不需要后台定时任务：打开列表时就是最新结果。
+# (天数, 提醒内容, 适合生成跟进话术)
+FOLLOW_UP_RULES: dict[str, tuple[int, str, bool]] = {
+    "planned": (2, "准备联系 {d} 天了，还没发出邀约", False),
+    "contacting": (3, "已联系 {d} 天没有新进展，建议再跟进一次", True),
+    "negotiating": (4, "洽谈 {d} 天没有新进展，确认对方意向", True),
+    "no_shipment": (2, "约定后 {d} 天还没建寄样单", False),
+    "ship_unconfirmed": (1, "寄样单 {d} 天还没核对确认", False),
+    "ship_confirmed": (2, "已确认寄样 {d} 天，还没登记寄出", False),
+    "in_transit": (7, "寄出 {d} 天还没确认签收，跟进物流或问达人是否收到", False),
+    "exception": (0, "物流异常，需要处理（补寄或关闭）", False),
+    "delivered": (5, "签收 {d} 天了，跟进达人拍摄进度", False),
+}
+
+
+def _parse_ts(v: str) -> datetime:
+    return datetime.fromisoformat(v.replace("Z", "+00:00"))
+
+
+def _phase(status: str, ship) -> str | None:
+    if status in ("planned", "contacting", "negotiating"):
+        return status
+    if status not in SHIPPABLE:
+        return None
+    if ship is None:
+        return "no_shipment"
+    if ship.status in ("draft", "awaiting_confirmation"):
+        return "ship_unconfirmed"
+    if ship.status == "confirmed":
+        return "ship_confirmed"
+    if ship.delivery_status in ("exception", "returned"):
+        return "exception"
+    if ship.delivery_status == "delivered":
+        return "delivered"
+    return "in_transit"
+
+
+def _follow_up(s: Session, r, ship, now: datetime | None = None) -> FollowUp | None:
+    phase = _phase(r["status"], ship)
+    if phase is None:
+        return None
+    days, msg, suggest = FOLLOW_UP_RULES[phase]
+    last = (
+        s.execute(
+            text("SELECT MAX(created_at) FROM collaboration_events WHERE collaboration_id=:c"), {"c": r["id"]}
+        ).scalar()
+        or r["updated_at"]
+    )
+    last_dt = _parse_ts(last)
+    now_dt = now or _parse_ts(utcnow_iso())
+    idle = max(0, (now_dt - last_dt).days)
+    manual = r.get("follow_up_at")
+    if manual and manual > last:
+        due, source = _parse_ts(manual), "manual"
+    else:
+        due, source = last_dt + timedelta(days=days), "rule"
+    return FollowUp(
+        due_at=_iso(due),
+        overdue=due <= now_dt,
+        idle_days=idle,
+        message=msg.format(d=max(idle, days) if source == "rule" else idle),
+        source=source,
+        suggest_follow_up_draft=suggest,
+    )
+
+
+def record_follow_up(collab_id: str, body: FollowUpIn) -> CollaborationDetail:
+    """记录一次跟进（重新开始计时）；可指定几天后再提醒。"""
+    now = utcnow_iso()
+    with tx() as s:
+        r = _collab_row(s, collab_id)
+        if _phase(r["status"], _latest_shipment(s, collab_id)) is None:
+            raise CollabError("not_active", "这个合作已关闭或已完成，不需要跟进")
+        nxt = _iso(_parse_ts(now) + timedelta(days=body.next_in_days)) if body.next_in_days else None
+        s.execute(
+            text("UPDATE collaborations SET follow_up_at=:f, updated_at=:n WHERE id=:id"),
+            {"f": nxt, "n": now, "id": collab_id},
+        )
+        note = body.note or "已跟进"
+        if body.next_in_days:
+            note += f"（{body.next_in_days} 天后再提醒）"
+        _event(s, collab_id, "follow_up", now, note=note)
+        _touch_relationship(s, r, now)
+        return _detail(s, collab_id)
+
+
+def snooze_follow_up(collab_id: str, body: SnoozeIn) -> CollaborationDetail:
+    """稍后提醒：不算一次进展，只把提醒推迟到 N 天后。"""
+    now = utcnow_iso()
+    with tx() as s:
+        r = _collab_row(s, collab_id)
+        if _phase(r["status"], _latest_shipment(s, collab_id)) is None:
+            raise CollabError("not_active", "这个合作已关闭或已完成，不需要跟进")
+        s.execute(
+            text("UPDATE collaborations SET follow_up_at=:f WHERE id=:id"),
+            {"f": _iso(_parse_ts(now) + timedelta(days=body.days)), "id": collab_id},
+        )
+        return _detail(s, collab_id)
+
+
 def _summary(s: Session, r) -> CollaborationSummary:
     ship = _latest_shipment(s, r["id"])
     handle = r["unique_id"]
@@ -341,6 +448,7 @@ def _summary(s: Session, r) -> CollaborationSummary:
         product_version_no=r["product_version_no"],
         agreed_at=r["agreed_at"],
         next_step=_next_step(r["status"], ship),
+        follow_up=_follow_up(s, r, ship),
         shipment_status=ship.status if ship else None,
         delivery_status=ship.delivery_status if ship and ship.status == "dispatched" else None,
         revision=r["revision"],
@@ -399,7 +507,7 @@ def get_collaboration(collab_id: str) -> CollaborationDetail:
 
 
 def list_collaborations(
-    status: str | None = None, campaign_market_id: str | None = None
+    status: str | None = None, campaign_market_id: str | None = None, due: bool = False
 ) -> list[CollaborationSummary]:
     sql = _COLLAB_SQL + " WHERE 1=1"
     params: dict[str, Any] = {}
@@ -411,7 +519,11 @@ def list_collaborations(
         params["cm"] = campaign_market_id
     with tx() as s:
         rows = s.execute(text(sql + " ORDER BY co.updated_at DESC"), params).mappings().all()
-        return [_summary(s, r) for r in rows]
+        out = [_summary(s, r) for r in rows]
+    if due:
+        out = [c for c in out if c.follow_up and c.follow_up.overdue]
+        out.sort(key=lambda c: c.follow_up.due_at if c.follow_up else "")
+    return out
 
 
 def create_collaboration(cm_id: str, body: CollaborationCreate) -> tuple[CollaborationDetail, bool]:

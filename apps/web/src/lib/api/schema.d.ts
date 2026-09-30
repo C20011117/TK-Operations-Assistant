@@ -711,6 +711,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/collaborations/{collab_id}/follow-ups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 记录一次跟进（重新开始计时，可指定几天后再提醒） */
+        post: operations["follow_up_api_v1_collaborations__collab_id__follow_ups_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collaborations/{collab_id}/snooze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 稍后提醒：把跟进提醒推迟 N 天（不算一次进展） */
+        post: operations["snooze_api_v1_collaborations__collab_id__snooze_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collaborations/{collab_id}/outreach-drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 这个合作生成过的话术 */
+        get: operations["outreach_list_api_v1_collaborations__collab_id__outreach_drafts_get"];
+        put?: never;
+        /** AI 生成邀约 / 跟进话术草稿（目标语言 + 中文对照）；只生成，不代发 */
+        post: operations["outreach_generate_api_v1_collaborations__collab_id__outreach_drafts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/outreach-drafts/{draft_id}/mark-sent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 标记这条话术已由本人发出（记为一次进展；第一次邀约会把合作改为联系中） */
+        post: operations["outreach_sent_api_v1_outreach_drafts__draft_id__mark_sent_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/collaborations/{collab_id}/shipments": {
         parameters: {
             query?: never;
@@ -1220,6 +1289,8 @@ export interface components {
              * @description 下一步该做什么（中文提示）
              */
             next_step: string | null;
+            /** @description 跟进提醒；已关闭 / 已完成的合作为空 */
+            follow_up?: components["schemas"]["FollowUp"] | null;
             /**
              * Shipment Status
              * @description 最近一张寄样单的状态
@@ -1282,6 +1353,8 @@ export interface components {
              * @description 下一步该做什么（中文提示）
              */
             next_step: string | null;
+            /** @description 跟进提醒；已关闭 / 已完成的合作为空 */
+            follow_up?: components["schemas"]["FollowUp"] | null;
             /**
              * Shipment Status
              * @description 最近一张寄样单的状态
@@ -1679,6 +1752,56 @@ export interface components {
             /** Data Quality Note */
             data_quality_note?: string | null;
         };
+        /**
+         * FollowUp
+         * @description 跟进提醒：按阶段和最近一次进展时间计算；“稍后提醒”会改为手动时间。
+         */
+        FollowUp: {
+            /**
+             * Due At
+             * @description 该跟进的时间（UTC）
+             */
+            due_at: string;
+            /**
+             * Overdue
+             * @description 已到期，需要跟进
+             */
+            overdue: boolean;
+            /**
+             * Idle Days
+             * @description 距最近一次进展的天数
+             */
+            idle_days: number;
+            /**
+             * Message
+             * @description 提醒内容（中文）
+             */
+            message: string;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "rule" | "manual";
+            /**
+             * Suggest Follow Up Draft
+             * @description 适合生成跟进话术（已联系 / 洽谈中）
+             */
+            suggest_follow_up_draft: boolean;
+        };
+        /** FollowUpIn */
+        FollowUpIn: {
+            /**
+             * Note
+             * @description 这次怎么跟进的，例如：再次私信提醒
+             * @default
+             */
+            note: string;
+            /**
+             * Next In Days
+             * @description 几天后再提醒；不填按规则
+             */
+            next_in_days?: number | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -1811,6 +1934,14 @@ export interface components {
              * @default
              */
             filename: string;
+        };
+        /** MarkSentIn */
+        MarkSentIn: {
+            /**
+             * Note
+             * @default
+             */
+            note: string;
         };
         /** Market */
         Market: {
@@ -1946,6 +2077,76 @@ export interface components {
              * @default
              */
             note: string;
+        };
+        /** OutreachDraftIn */
+        OutreachDraftIn: {
+            /**
+             * Purpose
+             * @default invite
+             * @enum {string}
+             */
+            purpose: "invite" | "follow_up";
+            /**
+             * Channel
+             * @default tiktok_message
+             * @enum {string}
+             */
+            channel: "tiktok_message" | "email";
+            /**
+             * Language
+             * @description 目标语言（ISO 639-1）；不填用站点的第一种内容语言
+             */
+            language?: string | null;
+            /**
+             * Tone
+             * @default friendly
+             * @enum {string}
+             */
+            tone: "friendly" | "professional";
+            /**
+             * Extra
+             * @description BD 想补充的要点，例如：可以先寄样再谈佣金
+             * @default
+             */
+            extra: string;
+        };
+        /** OutreachDraftView */
+        OutreachDraftView: {
+            /** Id */
+            id: string;
+            /** Collaboration Id */
+            collaboration_id: string;
+            /**
+             * Purpose
+             * @enum {string}
+             */
+            purpose: "invite" | "follow_up";
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "tiktok_message" | "email";
+            /** Language */
+            language: string;
+            /** Subject */
+            subject: string | null;
+            /** Message */
+            message: string;
+            /** Message Zh */
+            message_zh: string;
+            /** Personalization */
+            personalization: string[];
+            /**
+             * Warnings
+             * @description 发送前需要注意的地方（系统检查 + 模型提示）
+             */
+            warnings: string[];
+            /** Model */
+            model: string | null;
+            /** Sent At */
+            sent_at: string | null;
+            /** Created At */
+            created_at: string;
         };
         /**
          * ProductCategory
@@ -2484,6 +2685,11 @@ export interface components {
             };
             /** Created At */
             created_at: string;
+        };
+        /** SnoozeIn */
+        SnoozeIn: {
+            /** Days */
+            days: number;
         };
         /** TransitionIn */
         TransitionIn: {
@@ -3998,6 +4204,8 @@ export interface operations {
             query?: {
                 status?: ("planned" | "contacting" | "negotiating" | "agreed" | "in_progress" | "completed" | "closed") | null;
                 campaign_market_id?: string | null;
+                /** @description 只看到期该跟进的 */
+                due?: boolean;
             };
             header?: never;
             path?: never;
@@ -4103,6 +4311,177 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["AgreementIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    follow_up_api_v1_collaborations__collab_id__follow_ups_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collab_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FollowUpIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    snooze_api_v1_collaborations__collab_id__snooze_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collab_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SnoozeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    outreach_list_api_v1_collaborations__collab_id__outreach_drafts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collab_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OutreachDraftView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    outreach_generate_api_v1_collaborations__collab_id__outreach_drafts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collab_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OutreachDraftIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OutreachDraftView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    outreach_sent_api_v1_outreach_drafts__draft_id__mark_sent_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarkSentIn"];
             };
         };
         responses: {

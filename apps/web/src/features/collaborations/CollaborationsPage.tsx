@@ -6,8 +6,11 @@ import { Badge, Button, Empty, ErrorText, PageHeader } from "@/components/ui";
 import { api, errorMessage, unwrap } from "@/lib/api/client";
 import { collabStatusLabels, deliveryLabels, fmtTime, shipmentStatusLabels } from "@/lib/labels";
 
+import { FollowUpBadge, useDueFollowUps } from "./followUp";
+
 type Status = keyof typeof collabStatusLabels;
-const FILTERS: (Status | "active")[] = ["active", "planned", "contacting", "negotiating", "agreed", "in_progress", "closed"];
+type Filter = Status | "active" | "due";
+const FILTERS: Filter[] = ["due", "active", "planned", "contacting", "negotiating", "agreed", "in_progress", "closed"];
 export const collabTone = {
   planned: "slate",
   contacting: "blue",
@@ -19,13 +22,14 @@ export const collabTone = {
 } as const;
 
 export function CollaborationsPage() {
-  const [filter, setFilter] = useState<Status | "active">("active");
+  const due = useDueFollowUps();
+  const [filter, setFilter] = useState<Filter>(() => "active");
   const q = useQuery({
     queryKey: ["collaborations", filter],
     queryFn: () =>
       unwrap(
         api.GET("/api/v1/collaborations", {
-          params: { query: filter === "active" ? {} : { status: filter } },
+          params: { query: filter === "active" ? {} : filter === "due" ? { due: true } : { status: filter } },
         }),
       ),
   });
@@ -37,12 +41,14 @@ export function CollaborationsPage() {
       <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (
           <Button key={f} variant={f === filter ? "primary" : "secondary"} onClick={() => setFilter(f)}>
-            {f === "active" ? "进行中" : collabStatusLabels[f]}
+            {f === "active" ? "进行中" : f === "due" ? `待跟进 ${due.data?.length ?? 0}` : collabStatusLabels[f]}
           </Button>
         ))}
       </div>
       {q.error && <ErrorText>{errorMessage(q.error)}</ErrorText>}
-      {q.data && rows.length === 0 && <Empty>没有合作。在找人任务的推荐卡上标记“保留”后点“准备合作”。</Empty>}
+      {q.data && rows.length === 0 && (
+        <Empty>{filter === "due" ? "没有到期要跟进的合作。" : "没有合作。在找人任务的推荐卡上标记“保留”后点“准备合作”。"}</Empty>
+      )}
       {rows.length > 0 && (
         <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
           <table className="w-full text-sm">
@@ -70,12 +76,21 @@ export function CollaborationsPage() {
                   </td>
                   <td className="px-4 py-2">
                     <Badge tone={collabTone[r.status]}>{collabStatusLabels[r.status]}</Badge>
+                    {r.follow_up?.overdue && (
+                      <span className="ml-1">
+                        <Badge tone="amber">该跟进</Badge>
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-2 text-xs">
                     {r.shipment_status ? shipmentStatusLabels[r.shipment_status as keyof typeof shipmentStatusLabels] : "—"}
                     {r.delivery_status && ` · ${deliveryLabels[r.delivery_status as keyof typeof deliveryLabels]}`}
                   </td>
-                  <td className="px-4 py-2 text-slate-700">{r.next_step ?? "—"}</td>
+                  <td className="px-4 py-2 text-slate-700">
+                    <div>{r.next_step ?? "—"}</div>
+                    {r.follow_up?.overdue && <div className="text-xs text-amber-800">{r.follow_up.message}</div>}
+                    {r.follow_up && !r.follow_up.overdue && <FollowUpBadge f={r.follow_up} />}
+                  </td>
                   <td className="px-4 py-2 text-xs text-slate-500">{fmtTime(r.updated_at)}</td>
                 </tr>
               ))}

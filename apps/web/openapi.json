@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "TK 达人工作台（桌面版）本机接口",
-    "version": "0.3.0"
+    "version": "0.3.2"
   },
   "paths": {
     "/api/v1/system/health": {
@@ -2068,6 +2068,18 @@
               ],
               "title": "Campaign Market Id"
             }
+          },
+          {
+            "name": "due",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "只看到期该跟进的",
+              "default": false,
+              "title": "Due"
+            },
+            "description": "只看到期该跟进的"
           }
         ],
         "responses": {
@@ -2216,6 +2228,258 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/AgreementIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollaborationDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/collaborations/{collab_id}/follow-ups": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "记录一次跟进（重新开始计时，可指定几天后再提醒）",
+        "operationId": "follow_up_api_v1_collaborations__collab_id__follow_ups_post",
+        "parameters": [
+          {
+            "name": "collab_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Collab Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FollowUpIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollaborationDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/collaborations/{collab_id}/snooze": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "稍后提醒：把跟进提醒推迟 N 天（不算一次进展）",
+        "operationId": "snooze_api_v1_collaborations__collab_id__snooze_post",
+        "parameters": [
+          {
+            "name": "collab_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Collab Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SnoozeIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollaborationDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/collaborations/{collab_id}/outreach-drafts": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "AI 生成邀约 / 跟进话术草稿（目标语言 + 中文对照）；只生成，不代发",
+        "operationId": "outreach_generate_api_v1_collaborations__collab_id__outreach_drafts_post",
+        "parameters": [
+          {
+            "name": "collab_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Collab Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutreachDraftIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutreachDraftView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "这个合作生成过的话术",
+        "operationId": "outreach_list_api_v1_collaborations__collab_id__outreach_drafts_get",
+        "parameters": [
+          {
+            "name": "collab_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Collab Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OutreachDraftView"
+                  },
+                  "title": "Response Outreach List Api V1 Collaborations  Collab Id  Outreach Drafts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/outreach-drafts/{draft_id}/mark-sent": {
+      "post": {
+        "tags": [
+          "collaborations"
+        ],
+        "summary": "标记这条话术已由本人发出（记为一次进展；第一次邀约会把合作改为联系中）",
+        "operationId": "outreach_sent_api_v1_outreach_drafts__draft_id__mark_sent_post",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkSentIn"
               }
             }
           }
@@ -3807,6 +4071,17 @@
             "title": "Next Step",
             "description": "下一步该做什么（中文提示）"
           },
+          "follow_up": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FollowUp"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "跟进提醒；已关闭 / 已完成的合作为空"
+          },
           "shipment_status": {
             "anyOf": [
               {
@@ -4011,6 +4286,17 @@
             ],
             "title": "Next Step",
             "description": "下一步该做什么（中文提示）"
+          },
+          "follow_up": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FollowUp"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "跟进提醒；已关闭 / 已完成的合作为空"
           },
           "shipment_status": {
             "anyOf": [
@@ -5230,6 +5516,81 @@
         ],
         "title": "FieldSpec"
       },
+      "FollowUp": {
+        "properties": {
+          "due_at": {
+            "type": "string",
+            "title": "Due At",
+            "description": "该跟进的时间（UTC）"
+          },
+          "overdue": {
+            "type": "boolean",
+            "title": "Overdue",
+            "description": "已到期，需要跟进"
+          },
+          "idle_days": {
+            "type": "integer",
+            "title": "Idle Days",
+            "description": "距最近一次进展的天数"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "提醒内容（中文）"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "rule",
+              "manual"
+            ],
+            "title": "Source"
+          },
+          "suggest_follow_up_draft": {
+            "type": "boolean",
+            "title": "Suggest Follow Up Draft",
+            "description": "适合生成跟进话术（已联系 / 洽谈中）"
+          }
+        },
+        "type": "object",
+        "required": [
+          "due_at",
+          "overdue",
+          "idle_days",
+          "message",
+          "source",
+          "suggest_follow_up_draft"
+        ],
+        "title": "FollowUp",
+        "description": "跟进提醒：按阶段和最近一次进展时间计算；“稍后提醒”会改为手动时间。"
+      },
+      "FollowUpIn": {
+        "properties": {
+          "note": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Note",
+            "description": "这次怎么跟进的，例如：再次私信提醒",
+            "default": ""
+          },
+          "next_in_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 60.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next In Days",
+            "description": "几天后再提醒；不填按规则"
+          }
+        },
+        "type": "object",
+        "title": "FollowUpIn"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -5553,6 +5914,18 @@
           "csv"
         ],
         "title": "ManualImportIn"
+      },
+      "MarkSentIn": {
+        "properties": {
+          "note": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "MarkSentIn"
       },
       "Market": {
         "properties": {
@@ -5945,6 +6318,168 @@
           "state"
         ],
         "title": "Metric"
+      },
+      "OutreachDraftIn": {
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "invite",
+              "follow_up"
+            ],
+            "title": "Purpose",
+            "default": "invite"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "tiktok_message",
+              "email"
+            ],
+            "title": "Channel",
+            "default": "tiktok_message"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-z]{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language",
+            "description": "目标语言（ISO 639-1）；不填用站点的第一种内容语言"
+          },
+          "tone": {
+            "type": "string",
+            "enum": [
+              "friendly",
+              "professional"
+            ],
+            "title": "Tone",
+            "default": "friendly"
+          },
+          "extra": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Extra",
+            "description": "BD 想补充的要点，例如：可以先寄样再谈佣金",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "OutreachDraftIn"
+      },
+      "OutreachDraftView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "collaboration_id": {
+            "type": "string",
+            "title": "Collaboration Id"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "invite",
+              "follow_up"
+            ],
+            "title": "Purpose"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "tiktok_message",
+              "email"
+            ],
+            "title": "Channel"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "message_zh": {
+            "type": "string",
+            "title": "Message Zh"
+          },
+          "personalization": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Personalization"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings",
+            "description": "发送前需要注意的地方（系统检查 + 模型提示）"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "sent_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sent At"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "collaboration_id",
+          "purpose",
+          "channel",
+          "language",
+          "subject",
+          "message",
+          "message_zh",
+          "personalization",
+          "warnings",
+          "model",
+          "sent_at",
+          "created_at"
+        ],
+        "title": "OutreachDraftView"
       },
       "ProductCategory": {
         "properties": {
@@ -7547,6 +8082,21 @@
           "created_at"
         ],
         "title": "SnapshotView"
+      },
+      "SnoozeIn": {
+        "properties": {
+          "days": {
+            "type": "integer",
+            "maximum": 60.0,
+            "minimum": 1.0,
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "days"
+        ],
+        "title": "SnoozeIn"
       },
       "TransitionIn": {
         "properties": {

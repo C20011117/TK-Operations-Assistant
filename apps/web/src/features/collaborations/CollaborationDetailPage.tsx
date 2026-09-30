@@ -8,6 +8,8 @@ import type { CollaborationDetail } from "@/lib/api/types";
 import { agreedViaLabels, closedReasonLabels, collabStatusLabels, fmtTime, localNow } from "@/lib/labels";
 
 import { collabTone } from "./CollaborationsPage";
+import { FollowUpBar } from "./followUp";
+import { OutreachCard } from "./OutreachCard";
 import { ShipmentCard } from "./ShipmentCard";
 import { ShipmentForm } from "./ShipmentForm";
 
@@ -26,7 +28,7 @@ function useSet(id: string) {
   };
 }
 
-function ProgressCard({ c }: { c: CollaborationDetail }) {
+function ProgressCard({ c, onDraftFollowUp }: { c: CollaborationDetail; onDraftFollowUp: () => void }) {
   const set = useSet(c.id);
   const [note, setNote] = useState("");
   const [closing, setClosing] = useState(false);
@@ -50,6 +52,7 @@ function ProgressCard({ c }: { c: CollaborationDetail }) {
   return (
     <Card title="合作进度">
       <div className="space-y-3">
+        <FollowUpBar c={c} onDraftFollowUp={onDraftFollowUp} />
         <p className="text-sm">
           下一步：<span className="font-medium">{c.next_step ?? "—"}</span>
           {c.closed_reason && <span className="ml-2 text-slate-500">关闭原因：{closedReasonLabels[c.closed_reason as ClosedReason]}</span>}
@@ -213,6 +216,7 @@ function ShipmentsCard({ c, refresh }: { c: CollaborationDetail; refresh: () => 
 export function CollaborationDetailPage() {
   const { collabId = "" } = useParams();
   const qc = useQueryClient();
+  const [followUpRequest, setFollowUpRequest] = useState(0);
   const q = useQuery({
     queryKey: ["collaboration", collabId],
     queryFn: () => unwrap(api.GET("/api/v1/collaborations/{collab_id}", { params: { path: { collab_id: collabId } } })),
@@ -250,9 +254,10 @@ export function CollaborationDetailPage() {
         }
       />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ProgressCard c={c} />
+        <ProgressCard c={c} onDraftFollowUp={() => setFollowUpRequest((n) => n + 1)} />
         <AgreementCard c={c} />
       </div>
+      <OutreachCard c={c} followUpRequest={followUpRequest} />
       <ShipmentsCard c={c} refresh={refresh} />
       <Card title="历史">
         <ul className="space-y-1 text-sm">

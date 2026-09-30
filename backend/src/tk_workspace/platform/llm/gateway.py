@@ -22,7 +22,9 @@ class LLMCheck:
     data_region: str = ""
 
 
-def chat_model(purpose: Literal["matching", "brief"] = "matching", cfg: LLMConfig | None = None):
+def chat_model(
+    purpose: Literal["matching", "brief"] = "matching", cfg: LLMConfig | None = None, temperature: float = 0
+):
     from langchain_openai import ChatOpenAI
 
     c = cfg or get_llm_config()
@@ -33,7 +35,7 @@ def chat_model(purpose: Literal["matching", "brief"] = "matching", cfg: LLMConfi
         model=model,
         timeout=c.timeout_seconds,
         max_retries=1,
-        temperature=0,
+        temperature=temperature,
     )
 
 

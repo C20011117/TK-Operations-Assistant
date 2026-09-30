@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Header, HTTPException, Query, Response
 
-from tk_workspace.modules.collaborations import service
+from tk_workspace.modules.collaborations import outreach, service
 from tk_workspace.modules.collaborations.schemas import (
     AgreementIn,
     CollaborationCreate,
@@ -14,10 +14,15 @@ from tk_workspace.modules.collaborations.schemas import (
     DecisionIn,
     DecisionView,
     DispatchIn,
+    FollowUpIn,
+    MarkSentIn,
+    OutreachDraftIn,
+    OutreachDraftView,
     RecipientView,
     ShipmentEventIn,
     ShipmentIn,
     ShipmentView,
+    SnoozeIn,
     TransitionIn,
 )
 from tk_workspace.platform import crypto
@@ -83,8 +88,9 @@ def create_collab(cm_id: str, body: CollaborationCreate, response: Response) -> 
 def collabs(
     status: Annotated[CollabStatus | None, Query()] = None,
     campaign_market_id: Annotated[str | None, Query()] = None,
+    due: Annotated[bool, Query(description="只看到期该跟进的")] = False,
 ) -> list[CollaborationSummary]:
-    return service.list_collaborations(status, campaign_market_id)
+    return service.list_collaborations(status, campaign_market_id, due)
 
 
 @router.get(
@@ -112,6 +118,58 @@ def transition(collab_id: str, body: TransitionIn) -> CollaborationDetail:
 )
 def agree(collab_id: str, body: AgreementIn) -> CollaborationDetail:
     return _call(service.confirm_agreement, collab_id, body)
+
+
+# ---------------- 跟进提醒 ----------------
+
+
+@router.post(
+    "/collaborations/{collab_id}/follow-ups",
+    response_model=CollaborationDetail,
+    summary="记录一次跟进（重新开始计时，可指定几天后再提醒）",
+)
+def follow_up(collab_id: str, body: FollowUpIn) -> CollaborationDetail:
+    return _call(service.record_follow_up, collab_id, body)
+
+
+@router.post(
+    "/collaborations/{collab_id}/snooze",
+    response_model=CollaborationDetail,
+    summary="稍后提醒：把跟进提醒推迟 N 天（不算一次进展）",
+)
+def snooze(collab_id: str, body: SnoozeIn) -> CollaborationDetail:
+    return _call(service.snooze_follow_up, collab_id, body)
+
+
+# ---------------- 邀约话术 ----------------
+
+
+@router.post(
+    "/collaborations/{collab_id}/outreach-drafts",
+    response_model=OutreachDraftView,
+    status_code=201,
+    summary="AI 生成邀约 / 跟进话术草稿（目标语言 + 中文对照）；只生成，不代发",
+)
+def outreach_generate(collab_id: str, body: OutreachDraftIn) -> OutreachDraftView:
+    return _call(outreach.generate_draft, collab_id, body)
+
+
+@router.get(
+    "/collaborations/{collab_id}/outreach-drafts",
+    response_model=list[OutreachDraftView],
+    summary="这个合作生成过的话术",
+)
+def outreach_list(collab_id: str) -> list[OutreachDraftView]:
+    return _call(outreach.list_drafts, collab_id)
+
+
+@router.post(
+    "/outreach-drafts/{draft_id}/mark-sent",
+    response_model=CollaborationDetail,
+    summary="标记这条话术已由本人发出（记为一次进展；第一次邀约会把合作改为联系中）",
+)
+def outreach_sent(draft_id: str, body: MarkSentIn) -> CollaborationDetail:
+    return _call(outreach.mark_sent, draft_id, body)
 
 
 # ---------------- 寄样 ----------------

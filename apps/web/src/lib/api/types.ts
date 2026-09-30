@@ -45,3 +45,6 @@ export type ShipmentView = S["ShipmentView"];
 export type ShipmentIn = S["ShipmentIn"];
 export type RecipientIn = S["RecipientIn"];
 export type ConfirmationPreview = S["ConfirmationPreview"];
+export type FollowUp = S["FollowUp"];
+export type OutreachDraftView = S["OutreachDraftView"];
+export type OutreachDraftIn = S["OutreachDraftIn"];

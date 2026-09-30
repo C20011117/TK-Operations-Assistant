@@ -1,6 +1,6 @@
 [project]
 name = "tk-workspace"
-version = "0.3.1"
+version = "0.3.2"
 description = "TK 多站点达人开发与内容运营工作台 - 桌面版后端"
 requires-python = ">=3.12,<3.13"
 dependencies = [
